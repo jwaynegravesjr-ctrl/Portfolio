@@ -1,0 +1,283 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="referrer" content="no-referrer"><meta name="description" content="Employment-based genetics quality-improvement case study by J. Wayne Graves Jr."><link rel="canonical" href="https://jwaynegravesjr-ctrl.github.io/Portfolio/case-studies/genetics/"><meta property="og:title" content="Genetics Support Tool | J. Wayne Graves Jr."><meta property="og:description" content="An evidence-led quality-improvement case study."><meta property="og:type" content="article"><meta property="og:url" content="https://jwaynegravesjr-ctrl.github.io/Portfolio/case-studies/genetics/"><meta property="og:image" content="https://jwaynegravesjr-ctrl.github.io/Portfolio/assets/images/social-preview.webp"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Genetics Support Tool | J. Wayne Graves Jr."><meta name="twitter:description" content="An evidence-led quality-improvement case study."><meta name="twitter:image" content="https://jwaynegravesjr-ctrl.github.io/Portfolio/assets/images/social-preview.webp"><title>Genetics Support Tool | J. Wayne Graves Jr.</title><link rel="stylesheet" href="../../assets/css/site.css"><link rel="stylesheet" href="../../assets/css/genetics-case.css"></head><body><a class="skip-link" href="#top">Skip to content</a>
+
+<div class="case-site" id="case-site">
+  <div class="site-progress" aria-hidden="true"><span id="site-progress-bar"></span></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="monogram" href="../../" aria-label="Return to portfolio home">
+        <span class="monogram-mark">JWG</span>
+        <span class="monogram-copy">
+          <strong>J. Wayne Graves Jr.</strong>
+          <span>Quality Operations &amp; Process Improvement</span>
+        </span>
+      </a>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+        <a href="../../#work">Work</a>
+        <a href="../../#about">About / How I Work</a>
+        <a href="../../assets/documents/J-Wayne-Graves-Jr-Resume.pdf" download="J_Wayne_Graves_Jr_Resume.pdf">Resume</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="section" id="signal" aria-labelledby="overview-title">
+      <div class="section-head reveal">
+        <div class="section-number">00</div>
+        <div>
+          <p class="section-kicker">Executive Summary</p>
+          <h1 class="section-title" id="overview-title">A small intervention for a costly, recurring problem.</h1>
+          <p class="section-deck">A lightweight decision-support tool transformed dense process guidance into timely, actionable choices for a specialty operation.</p>
+        </div>
+      </div>
+
+      <div class="split reveal">
+        <div class="prose">
+          <p>At Wipro, agents process medical prior-authorization requests using ICUE and more than 30 supporting job aids. Within the genetics specialty queue, experienced agents were encountering recurring errors during case triage despite specialized training and familiarity with the broader authorization process.</p>
+          <p>As Quality Lead, I identified the trend, personally analyzed its causes, proposed the intervention, developed the tool, coordinated subject-matter review, led implementation, and measured the result.</p>
+          <p>The resulting Genetics Support Tool was intentionally modest: a completely local browser file built to meet agents at the exact moment a difficult decision had to be made.</p>
+        </div>
+        <aside class="fact-card" aria-label="Project facts">
+          <h3>Project at a glance</h3>
+          <ul class="fact-list">
+            <li><strong>Users</strong><span>Genetics specialty agents</span></li>
+            <li><strong>Platform</strong><span>Local HTML, CSS and JavaScript</span></li>
+            <li><strong>Analysis</strong><span>Excel, light Python classification and RCA review</span></li>
+            <li><strong>Build</strong><span>Project-reported: approximately five hours to first usable version</span></li>
+            <li><strong>Privacy</strong><span>No collection, storage or transmission of case data</span></li>
+          </ul>
+        </aside>
+      </div>
+
+      <div class="metrics reveal" aria-label="Key project metrics">
+        <div class="metric"><span class="metric-value">≈75</span><span class="metric-label">Project-reported monthly baseline</span><span class="metric-note">April 2026 reference period</span></div>
+        <div class="metric"><span class="metric-value">&lt;10</span><span class="metric-label">Project-reported July-to-date count</span><span class="metric-note">Partial period; directional comparison only</span></div>
+        <div class="metric"><span class="metric-value">40</span><span class="metric-label">Project-reported agents enabled</span><span class="metric-note">Across every genetics team; case assertion</span></div>
+        <div class="metric"><span class="metric-value">5h</span><span class="metric-label">Project-reported first usable build</span><span class="metric-note">Design and development; case assertion</span></div>
+      </div>
+      <p class="data-note">Counts, timing, and scope in this case study are reported case assertions from the project presentation; they are not independently verified here.</p>
+    </section>
+
+    <section class="section" id="analysis" aria-labelledby="analysis-title">
+      <div class="section-head reveal">
+        <div class="section-number">01</div>
+        <div>
+          <p class="section-kicker">The Quality Signal</p>
+          <h2 class="section-title" id="analysis-title">The pattern emerged from the evidence, then became specific through human review.</h2>
+          <p class="section-deck">Client escalations and team-lead error records were charted, classified, and traced back to the behaviors behind the numbers.</p>
+        </div>
+      </div>
+
+      <div class="analysis-grid reveal">
+        <div class="chart-frame">
+          <div class="chart-header"><h3>Synthetic error-category distribution</h3><span>60 fictional records</span></div>
+          <div class="bar-chart" id="bar-chart" role="group" aria-label="Select a synthetic error category to inspect its record count"></div>
+          <p class="data-note">Portfolio demonstration only. The workbook contains fictional agents, cases and events created to show the analysis method—not the confidential operational dataset.</p>
+        </div>
+        <aside class="analysis-note" id="analysis-note" aria-live="polite">
+          <p class="section-kicker">Selected Category</p>
+          <span class="analysis-value" id="analysis-count">7</span>
+          <p class="analysis-name" id="analysis-name">Genetics GAP Process</p>
+          <p class="analysis-copy" id="analysis-copy">The sample shows how broad classification narrows attention before individual root-cause narratives are reviewed.</p>
+        </aside>
+      </div>
+
+      <div class="root-cause-panel reveal">
+        <h3>The issue was not effort. It was usability.</h3>
+        <p>The trend involved <strong>tenured, specially trained agents</strong>. The existing job aids were comprehensive but broad, clinically written, and difficult to translate into quick action under processing-time constraints. Several related decision points created repeated opportunities for mistakes. Agents needed concise guidance at the moment of decision—not another document to study.</p>
+      </div>
+    </section>
+
+    <section class="section" id="solution" aria-labelledby="solution-title">
+      <div class="section-head reveal">
+        <div class="section-number">02</div>
+        <div>
+          <p class="section-kicker">The Intervention</p>
+          <h2 class="section-title" id="solution-title">Eight recurring failure points became one guided decision path.</h2>
+          <p class="section-deck">The real tool asked eight targeted questions. The abbreviated public demonstration below recreates five representative decision points with fictionalized, nonconfidential guidance.</p>
+        </div>
+      </div>
+
+      <div class="decision-flow reveal" aria-label="Quality improvement workflow">
+        <div class="flow-step"><span>01</span><strong>Classify</strong><small>Group error records with light Python scripting.</small></div>
+        <div class="flow-step"><span>02</span><strong>Read deeply</strong><small>Examine individual RCA narratives for behavioral patterns.</small></div>
+        <div class="flow-step"><span>03</span><strong>Translate</strong><small>Convert failure points into direct questions.</small></div>
+        <div class="flow-step"><span>04</span><strong>Validate</strong><small>Compare with job aids and clinical feedback.</small></div>
+        <div class="flow-step"><span>05</span><strong>Enable</strong><small>Demonstrate, distribute, coach and measure.</small></div>
+      </div>
+
+      <div class="tool-shell reveal" id="demo">
+        <div class="tool-topbar">
+          <div><strong>Genetics Support Tool</strong><br><span>Sanitized portfolio demonstration</span></div>
+          <button class="tool-reset" id="tool-reset" type="button">Start over</button>
+        </div>
+        <div class="privacy-strip"><strong>Privacy note:</strong> This demonstration uses fictional information, does not connect to ICUE, and does not collect, retain or transmit patient or case data.</div>
+        <div class="tool-body">
+          <div class="tool-question" data-question="q1">
+            <span class="tool-number">1</span>
+            <h3>Are state requirements necessary for this case?</h3>
+            <div class="tool-answers">
+              <button class="tool-answer" type="button" data-answer="yes">Yes</button>
+              <button class="tool-answer" type="button" data-answer="no">No</button>
+            </div>
+            <div class="tool-outcome recommended" data-outcome="yes" role="status"><span class="recommend-tag">Recommended action</span>Add the applicable state requirements using the regulatory repository.</div>
+            <div class="tool-outcome" data-outcome="no" role="status">Enter N/A next to the State Requirements field.</div>
+          </div>
+
+          <div class="tool-question" data-question="q2">
+            <span class="tool-number">2</span>
+            <h3>Are any providers showing an unknown network status?</h3>
+            <div class="tool-answers">
+              <button class="tool-answer" type="button" data-answer="yes">Yes</button>
+              <button class="tool-answer" type="button" data-answer="no">No</button>
+            </div>
+            <div class="tool-outcome recommended" data-outcome="yes" role="status"><span class="recommend-tag">Recommended action</span>Verify and update the provider Tax ID so the correct in-network or out-of-network status appears.</div>
+            <div class="tool-outcome" data-outcome="no" role="status">Proceed to the next review point.</div>
+          </div>
+
+          <div class="tool-question" data-question="q3a">
+            <span class="tool-number">3a</span>
+            <h3>Are there any out-of-network providers?</h3>
+            <div class="tool-answers">
+              <button class="tool-answer" type="button" data-answer="yes">Yes</button>
+              <button class="tool-answer" type="button" data-answer="no">No</button>
+            </div>
+            <div class="tool-outcome" data-outcome="no" role="status">Proceed through the normal case path.</div>
+
+            <div class="tool-branch" id="q3b-branch">
+              <div class="branch-inner tool-question" data-question="q3b">
+                <span class="tool-number">3b</span>
+                <h3>Is there a GAP request?</h3>
+                <div class="tool-answers">
+                  <button class="tool-answer" type="button" data-answer="yes">Yes</button>
+                  <button class="tool-answer" type="button" data-answer="no">No</button>
+                </div>
+
+                <div class="tool-branch" id="gap-process">
+                  <div class="branch-inner">
+                    <ol class="process-list">
+                      <li>Send the request to the specialty GAP team.</li>
+                      <li>Document the request and reply on the case.</li>
+                      <li>Apply the appropriate GAP outcome note.</li>
+                    </ol>
+                    <div class="template-fields" aria-label="Fictional template information">
+                      <div class="template-field"><label for="case-number">Fictional case number</label><input id="case-number" type="text" autocomplete="off" placeholder="GEN-DEMO-001"></div>
+                      <div class="template-field"><label for="test-name">Test name</label><input id="test-name" type="text" autocomplete="off" placeholder="Example panel"></div>
+                      <div class="template-field"><label for="cpt-code">CPT code</label><input id="cpt-code" type="text" inputmode="numeric" autocomplete="off" placeholder="00000"></div>
+                      <div class="template-field"><label for="agent-name">Agent name</label><input id="agent-name" type="text" autocomplete="name" placeholder="Sample Agent"></div>
+                    </div>
+                    <div class="template-head"><span>Template preview</span><button class="copy-template" id="copy-template" type="button">Copy template</button></div>
+                    <pre class="template-preview" id="template-output" aria-live="polite">Hello Specialty Team,
+
+Please review the fictional genetics GAP request below.
+Case number:
+Test name:
+CPT code:
+
+Thank you,
+&lt;Agent Name&gt;</pre>
+                  </div>
+                </div>
+
+                <div class="tool-branch" id="q3c-branch">
+                  <div class="branch-inner tool-question" data-question="q3c">
+                    <span class="tool-number">3c</span>
+                    <h3>Are out-of-network benefits available?</h3>
+                    <div class="tool-answers">
+                      <button class="tool-answer" type="button" data-answer="yes">Yes</button>
+                      <button class="tool-answer" type="button" data-answer="no">No</button>
+                    </div>
+                    <div class="tool-outcome" data-outcome="yes" role="status">Proceed through the normal case path.</div>
+                    <div class="tool-outcome recommended" data-outcome="no" role="status"><span class="recommend-tag">Recommended action</span>Follow the applicable no-out-of-network-benefits process.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="results" aria-labelledby="results-title">
+      <div class="section-head reveal">
+        <div class="section-number">03</div>
+        <div>
+          <p class="section-kicker">Reported Results</p>
+          <h2 class="section-title" id="results-title">The reported trend moved downward against one April baseline.</h2>
+          <p class="section-deck">The normalized index below uses April as 100. July is a partial period, so the comparison is directional rather than a like-for-like monthly result.</p>
+        </div>
+      </div>
+
+      <div class="results-layout reveal">
+        <div class="result-chart" role="img" aria-label="Normalized related-error index: April 100, May 74, June 48, and July to date below 20">
+          <h3>Reported related-error index</h3>
+          <p>April 2026 baseline = 100</p>
+          <div class="result-bars">
+            <div class="result-column"><span class="result-value">100</span><div class="result-bar" style="--result-height:100%"></div><span class="result-month">April</span></div>
+            <div class="result-column"><span class="result-value">74</span><div class="result-bar" style="--result-height:74%"></div><span class="result-month">May</span></div>
+            <div class="result-column"><span class="result-value">48</span><div class="result-bar" style="--result-height:48%"></div><span class="result-month">June</span></div>
+            <div class="result-column"><span class="result-value">&lt;20</span><div class="result-bar" style="--result-height:18%"></div><span class="result-month">July to date</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="implementation" aria-labelledby="implementation-title">
+      <div class="section-head reveal">
+        <div class="section-number">04</div>
+        <div>
+          <p class="section-kicker">Validation &amp; Adoption</p>
+          <h2 class="section-title" id="implementation-title">A tool succeeds only when its guidance is trusted and its use is easy.</h2>
+        </div>
+      </div>
+
+      <div class="timeline reveal">
+        <div class="timeline-item"><div class="timeline-date">April 2026</div><div class="timeline-copy"><h3>Signal identified</h3><p>A recurring genetics trend surfaced during preparation for a biweekly client quality review.</p></div></div>
+        <div class="timeline-item"><div class="timeline-date">Analysis</div><div class="timeline-copy"><h3>Errors classified and RCAs reviewed</h3><p>Light Python scripting narrowed broad categories; individual RCA narratives exposed the repeated decision failures underneath.</p></div></div>
+        <div class="timeline-item"><div class="timeline-date">Build</div><div class="timeline-copy"><h3>Decision logic developed</h3><p>Eight error-prone points were converted into questions, conditional guidance, alerts, and a structured GAP request template.</p></div></div>
+        <div class="timeline-item"><div class="timeline-date">Validation</div><div class="timeline-copy"><h3>Clinical subject-matter review</h3><p>The guidance was compared with current job aids and nurse feedback, then privately walked through with the genetics nurse team lead.</p></div></div>
+        <div class="timeline-item"><div class="timeline-date">May 2026</div><div class="timeline-copy"><h3>Local release and enablement</h3><p>Every genetics team received a live demonstration. Team leads received separate enablement and written download, use, and redistribution instructions.</p></div></div>
+        <div class="timeline-item"><div class="timeline-date">May–July</div><div class="timeline-copy"><h3>Measurement and client presentation</h3><p>Errors were tracked against the same April baseline. Client leadership reviewed the tool, its decision logic, and its measured impact.</p></div></div>
+      </div>
+
+      <div class="constraint-grid reveal" aria-label="Operational responsibilities during development">
+        <div class="constraint"><strong>2,000</strong><span>Project-reported cases in daily inventory supported against turnaround-time requirements; separate from the resume's audit-record claim</span></div>
+        <div class="constraint"><strong>16</strong><span>Project-reported employees led alongside ongoing quality and client-reporting responsibilities</span></div>
+        <div class="constraint"><strong>25</strong><span>Project-reported new employees onboarded, trained, and ramped during the project</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="reflection" aria-labelledby="reflection-title">
+      <div class="section-head reveal">
+        <div class="section-number">05</div>
+        <div>
+          <p class="section-kicker">Reflection &amp; Direction</p>
+          <h2 class="section-title" id="reflection-title">The most effective solution was not the largest one.</h2>
+          <p class="section-deck">It was the intervention that respected how work actually happened.</p>
+        </div>
+      </div>
+
+      <div class="reflection-grid reveal">
+        <article class="reflection-card">
+          <h3>What I learned</h3>
+          <p>Identifying an error is only the beginning. Quality leaders must understand why the mistake makes sense from the user’s perspective, then create an intervention that fits real operational constraints. This tool succeeded because it transformed dense information into timely guidance instead of asking agents to study more material.</p>
+        </article>
+        <article class="reflection-card">
+          <h3>Future direction</h3>
+          <p>A second version would become a modular support center with search and dedicated process tabs. New decision guides could be added without redesigning the whole tool, preserving the original simplicity while extending the approach across other lines of business.</p>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="closing">
+    <p>Case conclusion</p>
+    <strong>Grounded in quality data. Designed around the user. Measured by the result.</strong>
+    <div class="footer-meta"><span>J. Wayne Graves Jr. · Quality Lead</span><span>Portfolio case study · 2026</span></div>
+    <div class="footer-actions"><a class="button" href="../../">Back to portfolio</a><a class="button" href="../../assets/documents/J-Wayne-Graves-Jr-Resume.pdf" download="J_Wayne_Graves_Jr_Resume.pdf">Resume (PDF)</a><a class="button" href="mailto:jwaynegravesjr@gmail.com">Contact</a></div>
+  </footer>
+</div>
+
+<script src="../../assets/js/site.js" defer></script><script src="../../assets/js/genetics-support-tool.js" defer></script></body></html>
