@@ -11,7 +11,7 @@ The [public portfolio](https://jwaynegravesjr-ctrl.github.io/Portfolio/) is buil
 
 ## Site
 
-The opening is a hand-drawn ink animation. The page includes the Genetics Support Tool case story, full-operation figures, a synthetic report gallery, contact information, and a viewable and downloadable résumé. Native HTML keeps the content readable and accessible while decorative WebGL ink forms it as visitors scroll. Reduced-motion and rendering fallbacks show the content directly.
+The opening is a 24-second hand-drawn ink animation. Six birds begin perched while the name and role form from ink, hold through second 3, and disperse as two more birds fly in. The page includes the Genetics Support Tool case story, full-operation figures, a synthetic report gallery, contact information, and a viewable and downloadable résumé. Native HTML keeps the content readable and accessible while decorative WebGL ink forms it as visitors scroll. Reduced-motion and rendering fallbacks show the content directly.
 
 ## Build and publish
 
@@ -39,4 +39,5 @@ From `site/`, run `npm run validate` for the timeline and `npm run build:pages` 
 
 | Date | Change |
 | --- | --- |
+| 2026-09-23 | Published the 24-second opening with ink-formed title, slower wingbeats, opposite-edge newcomers, and a seamless six-bird loop boundary. |
 | 2026-09-23 | Replaced the former static portfolio with the Shared Perch website, embedded résumé, and reproducible GitHub Pages build. |

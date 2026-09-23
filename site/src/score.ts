@@ -1,5 +1,5 @@
-import {CAST,CHAPTERS,CLEARING_CAPTION,ORCHESTRATOR,SETTINGS,PLAYBACK} from './config';
-import {scoreTime} from './timing';
+import {BEATS,CAST,CHAPTERS,CLEARING_CAPTION,ORCHESTRATOR,SETTINGS,WINGBEATS_PER_SECOND} from './config';
+import {scoreTime,paperTime} from './timing';
 export {scoreTime,playbackTime} from './timing';
 import {type Point,type Bezier,bezier,ease,glide,lerp,limit,progress,pulse} from './numbers';
 import type {BirdPose} from './birds';
@@ -7,7 +7,7 @@ import {clearingPose} from './clearing';
 export {CLEARS,twigAt,beakPoint} from './clearing';
 export interface BirdState extends BirdPose {id:string;x:number;y:number;formation:number;dispersal:number;planted:boolean;action:string;pool:number;imprint:number}
 export interface SceneState {time:number;scoreTime:number;chapter:number;caption:string;birds:BirdState[];branchInk:number;branchLoss:number;registration:number;annotations:number}
-export const EVENTS=[{time:18.04,x:1360,weight:.5},{time:23.96,x:655,weight:.45},{time:29.36,x:285,weight:1},{time:31.14,x:1360,weight:1},{time:33.25,x:560,weight:.7}];
+export const EVENTS=[{time:11.62,x:1360,weight:.5},{time:14.5,x:655,weight:.45},{time:16.75,x:285,weight:1},{time:18.1,x:1360,weight:1},{time:19.9,x:560,weight:.7}];
 export function branchAt(x:number,t=0){
   const s=(x-155)/1290;let y=558-14*Math.sin(s*Math.PI)+7*Math.sin(s*5.3)+1.2*Math.sin(s*23);
   for(const e of EVENTS){const d=t-e.time;if(d>=0&&d<1.6)y+=e.weight*1.65*Math.sin(d*14)*Math.exp(-d*4.5)*Math.exp(-(((x-e.x)/150)**2));}
@@ -24,64 +24,66 @@ export const RIGHT_LAND:Bezier=[[1431,432],[1410,472],[1373,506],ground(1360)];
 // The demonstrator's useful final scoop is the same right-hand landing curve used later by B8.
 export const DEMO_POSITION:Bezier=[ground(931),[925,299],[1210,255],HOLD[1]];
 export const RESIDENT_RETURN:Bezier=[[220,432],[307,456],[510,454],ground(560)];
-export const LEADER_HOVER={bird:ORCHESTRATOR,depart:18.14,at:18.64,until:23.12,land:23.96,position:[800,330] as Point};
+export const LEADER_HOVER={bird:ORCHESTRATOR,depart:11.7,at:12.15,until:13.98,land:14.5,position:[800,330] as Point};
 export const LEADER_TWEETS=[
-  {at:18.68,until:19.52,text:'Clear the right twig.',face:1},
-  {at:20.08,until:20.94,text:'Now the left.',face:-1},
-  {at:21.10,until:22.58,text:'Leave room to land.',face:0},
+  {at:12.17,until:12.7,text:'Clear the right twig.',face:1},
+  {at:12.84,until:13.35,text:'Now the left.',face:-1},
+  {at:13.4,until:13.9,text:'Leave room to land.',face:0},
 ] as const;
 export interface Flight {bird:number;at:number;until:number;curve:Bezier;mode:'depart'|'travel'|'brake'|'squeeze'|'land'|'hover';face:number;label:string}
 const flights:Flight[]=[];
 function fly(bird:number,at:number,until:number,curve:Bezier,mode:Flight['mode'],face:number,label:string){flights.push({bird,at,until,curve,mode,face,label});}
-fly(6,3.25,4.8,[[-190,390],[-65,260],[117,292],HOLD[0]],'travel',1,'enter from the left edge');
-fly(7,3.7,4.98,[[1790,355],[1670,218],[1495,254],HOLD[1]],'travel',-1,'enter from the right edge');
-fly(6,5.1,5.82,[HOLD[0],[330,289],[510,331],COLLISION_LEG[0]],'travel',1,'first approach');
-fly(6,5.82,6.48,COLLISION_LEG,'brake',1,'blocked by fork');
-fly(6,6.48,6.98,[IMPACT,[794,498],[792,491],[786,492]],'squeeze',1,'recognize obstruction');
-fly(6,6.98,7.7,[[786,492],[660,383],[390,289],HOLD[0]],'travel',-1,'retreat');
-fly(7,8.1,8.82,[HOLD[1],[1170,245],[770,270],COLLISION_LEG[0]],'travel',-1,'second approach');
-fly(7,8.82,9.48,COLLISION_LEG,'brake',1,'same obstruction');
-fly(7,9.48,9.98,[IMPACT,[794,498],[792,491],[786,492]],'squeeze',1,'same correction');
-fly(7,9.98,10.7,[[786,492],[959,328],[1230,259],HOLD[1]],'travel',1,'retreat');
-fly(6,14.05,14.61,[HOLD[0],[350,284],[548,333],COLLISION_LEG[0]],'travel',1,'test wider gap');
-fly(6,14.61,15.18,COLLISION_LEG,'brake',1,'fork remains');
-fly(6,15.18,15.82,[IMPACT,[677,380],[409,289],HOLD[0]],'travel',-1,'proposal incomplete');
-fly(3,16.48,17.16,DEMO_POSITION,'depart',1,'position beside the fork');
-fly(3,17.16,17.5,RIGHT_ENTRY,'travel',-1,'show the side route');
-fly(3,17.5,18.04,RIGHT_LAND,'land',-1,'demonstrate a successful landing');
+fly(6,2.65,3.85,[[-190,390],[-65,260],[117,292],HOLD[0]],'travel',1,'enter from the left edge');
+fly(7,2.85,4.05,[[1790,355],[1670,218],[1495,254],HOLD[1]],'travel',-1,'enter from the right edge');
+fly(6,4.2,4.7,[HOLD[0],[330,289],[510,331],COLLISION_LEG[0]],'travel',1,'first approach');
+fly(6,4.7,5.2,COLLISION_LEG,'brake',1,'blocked by fork');
+fly(6,5.2,5.45,[IMPACT,[794,498],[792,491],[786,492]],'squeeze',1,'recognize obstruction');
+fly(6,5.45,6.0,[[786,492],[660,383],[390,289],HOLD[0]],'travel',-1,'retreat');
+fly(7,5.75,6.25,[HOLD[1],[1170,245],[770,270],COLLISION_LEG[0]],'travel',-1,'second approach');
+fly(7,6.25,6.75,COLLISION_LEG,'brake',1,'same obstruction');
+fly(7,6.75,7.0,[IMPACT,[794,498],[792,491],[786,492]],'squeeze',1,'same correction');
+fly(7,7.0,7.5,[[786,492],[959,328],[1230,259],HOLD[1]],'travel',1,'retreat');
+fly(6,8.55,8.98,[HOLD[0],[350,284],[548,333],COLLISION_LEG[0]],'travel',1,'test wider gap');
+fly(6,8.98,9.47,COLLISION_LEG,'brake',1,'fork remains');
+fly(6,9.47,9.98,[IMPACT,[677,380],[409,289],HOLD[0]],'travel',-1,'proposal incomplete');
+fly(3,10.25,10.82,DEMO_POSITION,'depart',1,'position beside the fork');
+fly(3,10.82,11.15,RIGHT_ENTRY,'travel',-1,'show the side route');
+fly(3,11.15,11.62,RIGHT_LAND,'land',-1,'demonstrate a successful landing');
 fly(ORCHESTRATOR,LEADER_HOVER.depart,LEADER_HOVER.at,[ground(565),[577,380],[708,304],LEADER_HOVER.position],'depart',1,'rise to guide the group');
 fly(ORCHESTRATOR,LEADER_HOVER.at,LEADER_HOVER.until,Array.from({length:4},()=>[...LEADER_HOVER.position]) as Bezier,'hover',1,'hover above the middle');
-fly(ORCHESTRATOR,23.12,23.46,[LEADER_HOVER.position,[723,302],[652,335],[655,418]],'travel',-1,'finish guiding the cleanup');
-fly(ORCHESTRATOR,23.46,LEADER_HOVER.land,[[655,418],[655,456],[655,500],ground(655)],'land',1,'rejoin the shared perch');
-fly(3,19.65,20.21,[ground(1360),[1250,315],[947,344],ground(925)],'land',-1,'make the end pocket available');
-fly(6,28.03,28.58,LEFT_ENTRY,'travel',1,'follow left guidance');
-fly(6,28.58,29.36,LEFT_LAND,'land',1,'first comfortable landing');
-fly(7,29.8,30.36,RIGHT_ENTRY,'travel',-1,'follow right guidance');
-fly(7,30.36,31.14,RIGHT_LAND,'land',-1,'second comfortable landing');
-fly(0,31.56,32.08,[ground(560),[491,379],[301,293],HOLD[0]],'depart',-1,'resident tries the route');
-fly(0,32.08,32.56,LEFT_ENTRY,'travel',1,'repeat established entry');
-fly(0,32.56,33.25,RESIDENT_RETURN,'land',1,'return to original perch');
+fly(ORCHESTRATOR,13.98,14.25,[LEADER_HOVER.position,[723,302],[652,335],[655,418]],'travel',-1,'finish guiding the cleanup');
+fly(ORCHESTRATOR,14.25,LEADER_HOVER.land,[[655,418],[655,456],[655,500],ground(655)],'land',1,'rejoin the shared perch');
+fly(3,12.55,13.0,[ground(1360),[1250,315],[947,344],ground(925)],'land',-1,'make the end pocket available');
+fly(6,15.6,16.1,LEFT_ENTRY,'travel',1,'follow left guidance');
+fly(6,16.1,16.75,LEFT_LAND,'land',1,'first comfortable landing');
+fly(7,16.95,17.45,RIGHT_ENTRY,'travel',-1,'follow right guidance');
+fly(7,17.45,18.1,RIGHT_LAND,'land',-1,'second comfortable landing');
+fly(0,18.4,18.85,[ground(560),[491,379],[301,293],HOLD[0]],'depart',-1,'resident tries the route');
+fly(0,18.85,19.25,LEFT_ENTRY,'travel',1,'repeat established entry');
+fly(0,19.25,19.9,RESIDENT_RETURN,'land',1,'return to original perch');
 export const FLIGHTS=flights;
 export interface Shift {bird:number;at:number;until:number;from:number;to:number;lift:number;label:string}
 export const SHIFTS:Shift[]=[
-  {bird:1,at:12.0,until:12.4,from:627,to:565,lift:21,label:'make room for the first proposal'},
-  {bird:2,at:12.62,until:13.03,from:702,to:657,lift:17,label:'widen the central gap'},
-  {bird:0,at:13.23,until:13.62,from:420,to:392,lift:12,label:'complete the outward shift'},
-  {bird:2,at:19.0,until:19.43,from:657,to:748,lift:26,label:'first reconsidered move'},
-  {bird:4,at:20.44,until:20.8,from:1004,to:1038,lift:0,label:'right neighbour responds'},
-  {bird:5,at:21.66,until:22.1,from:1230,to:1136,lift:23,label:'open the right landing pocket'},
-  {bird:0,at:22.32,until:22.79,from:392,to:560,lift:32,label:'open the left landing pocket'},
+  {bird:1,at:7.75,until:8.08,from:627,to:565,lift:21,label:'make room for the first proposal'},
+  {bird:2,at:8.09,until:8.38,from:702,to:657,lift:17,label:'widen the central gap'},
+  {bird:0,at:8.4,until:8.68,from:420,to:392,lift:12,label:'complete the outward shift'},
+  {bird:2,at:12.05,until:12.37,from:657,to:748,lift:26,label:'first reconsidered move'},
+  {bird:4,at:12.9,until:13.18,from:1004,to:1038,lift:0,label:'right neighbour responds'},
+  {bird:5,at:13.3,until:13.63,from:1230,to:1136,lift:23,label:'open the right landing pocket'},
+  {bird:0,at:13.7,until:14.06,from:392,to:560,lift:32,label:'open the left landing pocket'},
 ];
-export const endInk=(i:number)=>35.2+i*.13;
-export const INK_RESTS=[{bird:6,at:7.88,release:11.4},{bird:7,at:10.88,release:23.4},{bird:6,at:16.0,release:22.95}];
+export const endInk=(i:number)=>21+i*.04;
+export const INK_RESTS=[{bird:6,at:6.08,release:7.65},{bird:7,at:7.54,release:14.82},{bird:6,at:10.02,release:14.75}];
 // The coordinator listens to the demonstration, then invites each group in turn.
 // Cues precede the helpers' attention and grasp; they do not replace their contributions.
 export const COORDINATION=[
-  {at:18.58,cueAt:18.68,cueUntil:19.12,releaseAt:19.18,until:19.38,face:1,recipient:5,responseAt:19.18,responseUntil:19.4},
-  {at:19.85,cueAt:20.08,cueUntil:20.63,releaseAt:20.70,until:20.98,face:-1,recipient:0,responseAt:20.59,responseUntil:20.86},
+  {at:12.14,cueAt:12.17,cueUntil:12.57,releaseAt:12.62,until:12.8,face:1,recipient:5,responseAt:12.48,responseUntil:12.7},
+  {at:12.81,cueAt:12.84,cueUntil:13.23,releaseAt:13.28,until:13.45,face:-1,recipient:0,responseAt:13.1,responseUntil:13.33},
 ] as const;
 export function birdAt(i:number,raw:number):BirdState{
-  const b=CAST[i],t=i<6&&raw<4.4?0:Math.min(raw,endInk(i));
+  const b=CAST[i],tableau=raw>=BEATS.dispersalEnd;
+  const t=tableau||i<6&&raw<BEATS.arrivals?0:Math.min(raw,endInk(i));
+  const gesture=paperTime(raw);
   let x=b.initial as number,y=branchAt(x,t),facing=b.face as number,spread=0,flap=0,pitch=0,planted=i<6,action='rest',footReach=1;
   let currentFlight:Flight|undefined,currentShift:Shift|undefined,lastFlight:Flight|undefined;
   // Every event is absolute. Choosing the latest begun action avoids competing completed events.
@@ -106,7 +108,7 @@ export function birdAt(i:number,raw:number):BirdState{
       spread=lerp(priorSpread,targetSpread,ease(progress(t,f.at,f.at+.14)))*opening*folding;
       const flapStrength=f.mode==='brake'?.22:f.mode==='squeeze'?.48:.62;
       const beats=(f.mode==='land'?1-ease(progress(p,.42,.8)):1);
-      flap=Math.sin(t*Math.PI*2*5.7+b.seed)*flapStrength*beats*opening*folding;
+      flap=Math.sin(t*Math.PI*2*WINGBEATS_PER_SECOND+b.seed)*flapStrength*beats*opening*folding;
       pitch=facing*(f.mode==='brake'?-.14:f.mode==='land'?-.09:.12*Math.sin(p*Math.PI));
       footReach=lands?ease(progress(p,.55,.87)):0;
     }
@@ -118,8 +120,8 @@ export function birdAt(i:number,raw:number):BirdState{
   }
   // Waiting is intentionally quieter than the active demonstration: shallow glides, isolated beats.
   if(!planted&&(!currentFlight||t>=currentFlight.until)){
-    const quiet=pulse(t,11,27.9,.5),wingBeatWindow=pulse((t+i*.31)%3.4,0,.6,.12);
-    flap=Math.sin(t*Math.PI*2*5.7)*.26*wingBeatWindow*(1-quiet*.7);spread=.59;
+    const quiet=pulse(gesture,11,27.9,.5),wingBeatWindow=pulse((t+i*.31)%3.4,0,.6,.12);
+    flap=Math.sin(t*Math.PI*2*WINGBEATS_PER_SECOND)*.26*wingBeatWindow*(1-quiet*.7);spread=.59;
     const next=FLIGHTS.find(f=>f.bird===i&&f.at>t);
     const settle=currentFlight?ease(progress(t,currentFlight.until,currentFlight.until+.25)):1;
     const prepare=next?1-ease(progress(t,next.at-.22,next.at)):1;
@@ -128,25 +130,25 @@ export function birdAt(i:number,raw:number):BirdState{
   if(currentFlight?.mode==='hover'&&t<currentFlight.until){
     const f=currentFlight,settled=ease(progress(t,f.at,f.at+.18))*(1-ease(progress(t,f.until-.16,f.until)));
     x+=Math.sin((t-f.at)*1.55)*4.5*settled;y+=Math.sin((t-f.at)*2.25)*2.8*settled;
-    spread=.79;flap=Math.sin(t*Math.PI*2*5.7+b.seed)*lerp(.62,.33,settled);
+    spread=.79;flap=Math.sin(t*Math.PI*2*WINGBEATS_PER_SECOND+b.seed)*lerp(.62,.33,settled);
     pitch=.022*Math.sin((t-f.at)*1.6)*settled;footReach=0;planted=false;
   }
   let head=Math.sin(t*.68+b.seed)*.035,tail=Math.sin(t*1.4+b.seed)*.026,breath=Math.sin(t*1.6+b.seed)*.7,ruffle=0,signal=0,tweet=0;
-  if(i<6){head-=.18*pulse(t,11.03+i*.025,11.52,.13);head+=.14*pulse(t,11.58+i*.025,11.96,.1);}
-  if(i===2)head+=.18*pulse(t,11.87,12.52,.18);
+  if(i<6){head-=.18*pulse(gesture,11.03+i*.025,11.52,.13);head+=.14*pulse(gesture,11.58+i*.025,11.96,.1);}
+  if(i===2)head+=.18*pulse(gesture,11.87,12.52,.18);
   // Delayed nearby reactions to the two identical points of failure.
-  if(i===2||i===3){const r=pulse(t,6.68,7.48)+pulse(t,9.68,10.45);pitch-=r*.09;head-=r*.24;}
-  if(i<3){head-=.3*pulse(t,17.8+i*.07,18.28,.16);head+=.17*pulse(t,18.32+i*.025,18.69,.1);head-=.28*pulse(t,18.77+i*.025,19.27,.14);}
-  if(i===4)head-=.23*pulse(t,20.01,20.58,.16);
-  if(i===1)head-=.19*pulse(t,20.65,21.12,.16);
-  if(i===5)head-=.26*pulse(t,21.31,21.83,.14);
-  if(i===0)head-=.23*pulse(t,21.96,22.4,.13);
+  if(i===2||i===3){const r=pulse(gesture,6.68,7.48)+pulse(gesture,9.68,10.45);pitch-=r*.09;head-=r*.24;}
+  if(i<3){head-=.3*pulse(gesture,17.8+i*.07,18.28,.16);head+=.17*pulse(gesture,18.32+i*.025,18.69,.1);head-=.28*pulse(gesture,18.77+i*.025,19.27,.14);}
+  if(i===4)head-=.23*pulse(gesture,20.01,20.58,.16);
+  if(i===1)head-=.19*pulse(gesture,20.65,21.12,.16);
+  if(i===5)head-=.26*pulse(gesture,21.31,21.83,.14);
+  if(i===0)head-=.23*pulse(gesture,21.96,22.4,.13);
   // The resident anticipates each arrival instead of reacting after a collision.
-  if(i===0){pitch-=.085*pulse(t,28.96,29.7,.18);head-=.2*pulse(t,28.75,29.55,.15);}
-  if(i===5){pitch-=.085*pulse(t,30.7,31.45,.18);head-=.22*pulse(t,30.53,31.36,.15);}
-  if(i===1)head-=.24*pulse(t,33.3,33.8,.15);
-  if(i===4)head+=.36*pulse(t,33.85,34.4,.18);
-  if(i===2)ruffle=Math.sin(t*34)*pulse(t,34.5,34.95,.12);
+  if(i===0){pitch-=.085*pulse(gesture,28.96,29.7,.18);head-=.2*pulse(gesture,28.75,29.55,.15);}
+  if(i===5){pitch-=.085*pulse(gesture,30.7,31.45,.18);head-=.22*pulse(gesture,30.53,31.36,.15);}
+  if(i===1)head-=.24*pulse(gesture,33.3,33.8,.15);
+  if(i===4)head+=.36*pulse(gesture,33.85,34.4,.18);
+  if(i===2)ruffle=Math.sin(t*34)*pulse(gesture,34.5,34.95,.12);
   const clearing=clearingPose(i,t);pitch+=clearing.pitch;head+=clearing.head;tail+=clearing.tail;ruffle+=clearing.ruffle;
   for(const cue of COORDINATION){
     if(i===ORCHESTRATOR&&t>=cue.at&&t<cue.until){
@@ -158,7 +160,7 @@ export function birdAt(i:number,raw:number):BirdState{
     if(i===cue.recipient)head-=.22*pulse(t,cue.responseAt,cue.responseUntil,.07);
   }
   if(i===ORCHESTRATOR){
-    const addressBoth=pulse(t,21.02,22.8,.24);facing=lerp(facing,0,addressBoth);
+    const addressBoth=pulse(t,13.37,14.06,.15);facing=lerp(facing,0,addressBoth);
     for(const call of LEADER_TWEETS){
       const voice=pulse(t,call.at,call.until,.12);
       tweet=Math.max(tweet,voice*Math.pow(Math.max(0,Math.sin((t-call.at)*Math.PI*2*5.4)),.7));
@@ -174,10 +176,12 @@ export function birdAt(i:number,raw:number):BirdState{
     return [fx-x,branchAt(fx,t)-y+fy];
   });
   void lastFlight;
-  const loss=progress(raw,endInk(i),endInk(i)+1.9);
-  const formation=ease(progress(raw,.9+i*.29,1.8+i*.29));
-  const birth=pulse(raw,.68+i*.29,1.5+i*.29,.16)*(1-formation);
-  return {id:b.id,x,y,facing,spread,flap,pitch,head,tail,breath,feet,ruffle,signal,tweet,planted,action,formation,dispersal:loss,pool:Math.max(birth,pulse(loss,.24,.95,.2)*.65),imprint:raw>=endInk(i)?100+i:-1};
+  const loss=tableau?0:progress(raw,endInk(i),endInk(i)+.9);
+  const formation=tableau?(i<6?ease(progress(raw,22.3+i*.06,23.2+i*.04)):0)
+    :(i<6?1:ease(progress(raw,2.5+(i-6)*.18,3.6+(i-6)*.18)));
+  const birth=tableau&&i<6?pulse(raw,22.24+i*.06,23.13+i*.04,.12)*(1-formation)
+    :i>=6?pulse(raw,2.42+(i-6)*.18,3.25+(i-6)*.18,.16)*(1-formation):0;
+  return {id:b.id,x,y,facing,spread,flap,pitch,head,tail,breath,feet,ruffle,signal,tweet,planted,action,formation,dispersal:loss,pool:Math.max(birth,tableau?0:pulse(loss,.24,.95,.2)*.65),imprint:raw>=endInk(i)&&!tableau?100+i:-1};
 }
 export function performedBird(i:number,t:number):BirdState{
   const base=birdAt(i,t);
@@ -193,8 +197,12 @@ export function performedBird(i:number,t:number):BirdState{
   return base;
 }
 export function evaluateScore(time:number):SceneState{
-  time=limit(time,0,PLAYBACK.scoreLength);let chapter=0;CHAPTERS.forEach((c,i)=>{if(time>=c[0])chapter=i;});
-  return {time,scoreTime:time,chapter,caption:time>=19.4&&time<24?CLEARING_CAPTION:CHAPTERS[chapter][2],birds:CAST.map((_,i)=>performedBird(i,time)),branchInk:ease(progress(time,.5,3.6)),branchLoss:progress(time,37.65,39.65),registration:12*pulse(time,25.05,27.75,.4),annotations:1-ease(progress(time,34.5,35.7))};
+  time=limit(time,0,SETTINGS.length);let chapter=0;CHAPTERS.forEach((c,i)=>{if(time>=c[0])chapter=i;});
+  const tableau=time>=BEATS.dispersalEnd;
+  return {time,scoreTime:time,chapter,caption:time>=12.1&&time<14.5?CLEARING_CAPTION:CHAPTERS[chapter][2],birds:CAST.map((_,i)=>performedBird(i,time)),
+    branchInk:tableau?ease(progress(time,22.25,23.35)):1,
+    branchLoss:tableau?0:progress(time,21.65,22.25),
+    registration:12*pulse(time,14.65,15.55,.16),annotations:1-ease(progress(time,20.8,22))};
 }
 export function evaluateScene(time:number):SceneState{
   const elapsed=limit(time,0,SETTINGS.length);

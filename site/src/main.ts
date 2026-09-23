@@ -1,7 +1,7 @@
-import * as T from 'three';import {SETTINGS,CAST,CLOSING,inkRGB} from './config';
+import * as T from 'three';import {SETTINGS,CAST,inkRGB} from './config';
 import {paintBird} from './birds';import {surface,wipe,branchDrawing,paperDrawing} from './sheet';import {layer,fields,vertex} from './pigment';
 import {evaluateScene,evaluateScore,birdAt,endInk,INK_RESTS,EVENTS,CLEARS,type BirdState} from './score';import {annotations,type ViewFlags} from './notes';
-import {scoreTime,playbackTime} from './timing';
+import {scoreTime,playbackTime,paperTime} from './timing';
 import {drawDataPaper,DATA_HEADINGS,dataHeadingOpacity} from './data-paper';
 import {drawTwigs} from './clearing';
 import {closingTitle,closingAt,paintClosing} from './closing';
@@ -42,7 +42,7 @@ const reduced=matchMedia('(prefers-reduced-motion:reduce)');let branchStamp='';
 const motionDisabled=()=>document.documentElement.dataset.motion?document.documentElement.dataset.motion==='off':reduced.matches;
 const clearingReleasePoses=CLEARS.map(action=>birdAt(action.bird,action.toss));
 function prepareDataPaper(t:number,poses:BirdState[]){
-  const dataTime=Math.floor(t*24)/24;if(dataTime!==dataStamp){drawDataPaper(originalData,dataTime);dataStamp=dataTime;}
+  const dataTime=Math.floor(paperTime(t)*24)/24;if(dataTime!==dataStamp){drawDataPaper(originalData,dataTime);dataStamp=dataTime;}
   dc.clearRect(0,0,1600,900);dc.drawImage(dataOriginal,0,0);
   // The ink birds shelter the worksheet, while the underlying paper fibers remain fixed.
   dc.save();dc.globalCompositeOperation='destination-out';
@@ -51,11 +51,10 @@ function prepareDataPaper(t:number,poses:BirdState[]){
 function ui(){const s=evaluateScene(time);el('labels').style.opacity=String(Math.min(1,s.registration/10)*(1-ease(progress(morphProgress,0,.12))));el('labels').setAttribute('aria-hidden',s.registration>8&&morphProgress<.02?'false':'true');el('play').setAttribute('aria-label',running?'Pause animation':'Play animation');}
 export function renderAt(seconds:number){
   if(!renderer||destroyed)return;time=Math.max(0,Math.min(SETTINGS.length,seconds));const s=evaluateScene(time),authored=s.scoreTime;
-  const staticMotion=motionDisabled();
-  const closing=ending.update(staticMotion&&Math.abs(authored-34.35)<.0001?CLOSING.resolved:authored,host.clientWidth);
+  const closing=ending.update(authored,host.clientWidth);
   const absorption=ease(progress(morphProgress,.015,.5)),fade=1-ease(progress(morphProgress,0,.27));
   ending.mesh.material.uniforms.loss.value=Math.max(closing.loss,absorption);
-  dataMaterial.uniforms.strength.value=1.1*(1-closing.quiet*.94)*fade;
+  dataMaterial.uniforms.strength.value=1.1*(1-closing.quiet)*fade;
   noteMaterial.uniforms.strength.value=1.1*fade;snagMaterial.uniforms.strength.value=fade;
   const snagTime=Math.min(authored,24);if(snagTime!==snagStamp){drawTwigs(sc,snagTime,s.birds,clearingReleasePoses);snagMap.needsUpdate=true;snagStamp=snagTime;}snagPlane.visible=authored>.5&&authored<24;
   for(let i=0;i<8;i++){const p=s.birds[i],b=birds[i],key=JSON.stringify([p.spread,p.flap,p.pitch,p.head,p.breath,p.tail,p.facing,p.feet,p.ruffle,p.signal,p.tweet]);if(key!==b.key){draw(i,b.ink.s,p);b.ink.art.needsUpdate=true;b.key=key;}
@@ -76,14 +75,14 @@ export function play(){if(!renderer||destroyed||morphProgress>0)return;running=t
 export function pause(){running=false;cancelAnimationFrame(request);el('play').textContent='Play';el('play').setAttribute('aria-label','Play animation');}
 export function seek(t:number){pause();renderAt(t);}
 function fallback(){
-  still.width=1600;still.height=900;still.classList.add('visible');const c=still.getContext('2d')!;c.drawImage(paper,0,0);const s=evaluateScore(34.35);
+  still.width=1600;still.height=900;still.classList.add('visible');const c=still.getContext('2d')!;c.drawImage(paper,0,0);const s=evaluateScore(20.4);
   function imprint(source:HTMLCanvasElement,x:number,y:number,w:number,h:number,color=SETTINGS.ink){const temp=document.createElement('canvas');temp.width=source.width;temp.height=source.height;const tc=temp.getContext('2d')!;tc.drawImage(source,0,0);tc.globalCompositeOperation='source-in';tc.fillStyle=color;tc.fillRect(0,0,temp.width,temp.height);c.drawImage(temp,x,y,w,h);}
-  s.birds.forEach((p,i)=>draw(i,birds[i].ink.s,p));prepareDataPaper(34.35,s.birds);c.globalAlpha=.066;imprint(dataPaper,0,0,1600,900,SETTINGS.note);c.globalAlpha=1;branchDrawing(twig,34.35);imprint(twig.ink,0,360,1600,290);s.birds.forEach((p,i)=>imprint(birds[i].ink.s.ink,p.x-160,p.y-216,320,288));imprint(bloom.ink,0,360,1600,290);paintClosing(c,host.clientWidth<600,SETTINGS.ink);
+  s.birds.forEach((p,i)=>draw(i,birds[i].ink.s,p));prepareDataPaper(20.4,s.birds);c.globalAlpha=.066;imprint(dataPaper,0,0,1600,900,SETTINGS.note);c.globalAlpha=1;branchDrawing(twig,20.4);imprint(twig.ink,0,360,1600,290);s.birds.forEach((p,i)=>imprint(birds[i].ink.s.ink,p.x-160,p.y-216,320,288));imprint(bloom.ink,0,360,1600,290);paintClosing(c,host.clientWidth<600,SETTINGS.ink);
   el('play').textContent='Still drawing';el<HTMLButtonElement>('play').disabled=true;
 }
 function fit(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,SETTINGS.pixelRatio));renderer.setSize(host.clientWidth,host.clientHeight,false);renderAt(time);}
 const observer=new ResizeObserver(fit);
-function preference(){if(motionDisabled())seek(playbackTime(34.35));else play();}
+function preference(){if(motionDisabled())seek(playbackTime(20.4));else play();}
 export function dispose(){pause();destroyed=true;observer.disconnect();reduced.removeEventListener('change',preference);morph.dispose();site.dispose();window.removeEventListener('perch:motion',motionPreference);for(const f of morphFields.values())f.dispose();for(const b of birds){for(const f of b.imprints.values())if(f!==b.ink.initialField)f.dispose();b.ink.dispose();}ending.dispose();branch.dispose();flowers.dispose();snagMap.dispose();snagMaterial.dispose();snagPlane.geometry.dispose();dataMap.dispose();dataMaterial.dispose();dataPlane.geometry.dispose();notesMap.dispose();noteMaterial.dispose();notePlane.geometry.dispose();paperMap.dispose();paperPlane.geometry.dispose();paperPlane.material.dispose();renderer?.dispose();renderer?.domElement.remove();}
 try{renderer=new T.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.debug.checkShaderErrors=true;renderer.debug.onShaderError=(gl,p,v,f)=>{console.error('Ink shader failed',gl.getProgramInfoLog(p),gl.getShaderInfoLog(v),gl.getShaderInfoLog(f));pause();renderer!.domElement.style.display='none';fallback();};renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor(SETTINGS.paper);renderer.domElement.setAttribute('aria-hidden','true');host.prepend(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();pause();renderer!.domElement.style.display='none';fallback();});observer.observe(host);fit();preference();}catch(e){console.info('Using the static ink drawing',e);fallback();}
 el('play').addEventListener('click',()=>running?pause():play());
@@ -98,7 +97,7 @@ function setMorph(value:number){
   renderAt(time);
 }
 const morph=initScrollMorph({getState:()=>({time,running,available:!!renderer}),pause,play,setProgress:setMorph});
-function motionPreference(event:Event){const enabled=(event as CustomEvent<{enabled:boolean}>).detail.enabled;if(!enabled){pause();renderAt(playbackTime(34.35));}else if(morphProgress===0)play();}
+function motionPreference(event:Event){const enabled=(event as CustomEvent<{enabled:boolean}>).detail.enabled;if(!enabled){pause();renderAt(playbackTime(20.4));}else if(morphProgress===0)play();}
 window.addEventListener('perch:motion',motionPreference);
 const site=initSiteEffects();
-if(import.meta.env.DEV||new URLSearchParams(location.search).has('inspect'))(window as unknown as Record<string,unknown>).sharedPerch={evaluateScene,renderAt,play,pause,seek,scoreTime,playbackTime,dispose,setFlags(f:Partial<ViewFlags>){Object.assign(flags,f);renderAt(time);},diagnostics(){const authored=scoreTime(time);return {time,running,frameCount,morphProgress,state:evaluateScene(time),closing:closingAt(reduced.matches&&Math.abs(authored-34.35)<.0001?CLOSING.resolved:authored),headingAlphas:DATA_HEADINGS.map(h=>dataHeadingOpacity(Math.floor(authored*24)/24,h)),intervals:[...intervals],calls:renderer?.info.render.calls,textures:renderer?.info.memory.textures,available:!!renderer,positions:birds.map(b=>[b.ink.mesh.position.x,b.ink.mesh.position.y]),visible:birds.filter(b=>b.ink.mesh.visible).length};}};
+if(import.meta.env.DEV||new URLSearchParams(location.search).has('inspect'))(window as unknown as Record<string,unknown>).sharedPerch={evaluateScene,renderAt,play,pause,seek,scoreTime,playbackTime,dispose,setFlags(f:Partial<ViewFlags>){Object.assign(flags,f);renderAt(time);},diagnostics(){const authored=scoreTime(time);return {time,running,frameCount,morphProgress,state:evaluateScene(time),closing:closingAt(authored),headingAlphas:DATA_HEADINGS.map(h=>dataHeadingOpacity(Math.floor(paperTime(authored)*24)/24,h)),intervals:[...intervals],calls:renderer?.info.render.calls,textures:renderer?.info.memory.textures,available:!!renderer,positions:birds.map(b=>[b.ink.mesh.position.x,b.ink.mesh.position.y]),visible:birds.filter(b=>b.ink.mesh.visible).length};}};

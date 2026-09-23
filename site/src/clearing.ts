@@ -13,10 +13,10 @@ export interface ClearAction {
  * Both birds finish their small task before making their existing inward hop.
  */
 export const CLEARS:readonly ClearAction[]=[
-  {bird:5,perch:1230,side:1,at:19.4,grip:19.67,tugs:[[19.82,20.0],[20.10,20.30]],
-    release:20.38,toss:20.60,until:20.95,fadeUntil:23.25,landing:[1404,640]},
-  {bird:0,perch:392,side:-1,at:20.85,grip:21.10,tugs:[[21.24,21.42],[21.53,21.72]],
-    release:21.78,toss:21.97,until:22.20,fadeUntil:23.70,landing:[234,641]},
+  {bird:5,perch:1230,side:1,at:12.35,grip:12.53,tugs:[[12.58,12.70],[12.75,12.86]],
+    release:12.9,toss:13.03,until:13.3,fadeUntil:14.15,landing:[1404,640]},
+  {bird:0,perch:392,side:-1,at:12.95,grip:13.12,tugs:[[13.16,13.26],[13.3,13.4]],
+    release:13.43,toss:13.55,until:13.75,fadeUntil:14.35,landing:[234,641]},
 ];
 
 export interface ClearingPose {pitch:number;head:number;tail:number;ruffle:number}
@@ -72,7 +72,7 @@ function referenceBird(action:ClearAction,t:number):BeakPose {
   const b=CAST[action.bird],offset=clearingPose(action.bird,t);
   let head=Math.sin(t*.68+b.seed)*.035;
   // B1's already-authored attention gesture begins just before its final flick.
-  if(action.bird===0)head-=.23*pulse(t,21.96,22.4,.13);
+  if(action.bird===0)head-=.23*pulse(t,13.55,13.84,.09);
   return {x:action.perch,y:perchY(action.perch),facing:b.face,
     head:head+offset.head,pitch:offset.pitch,breath:Math.sin(t*1.6+b.seed)*.7};
 }
@@ -94,8 +94,8 @@ export function twigAt(index:number,t:number,birds:readonly BirdState[],releaseP
   const contactX=d.perch+face*104;
   const contact:Point=[contactX,perchY(contactX)];
   const startingGrip=beakPoint(d.bird,referenceBird(d,d.grip));
-  const formation=ease(progress(t,1.05+index*.18,2.85+index*.12));
-  const state:TwigState={bird:d.bird,phase:t<1.05+index*.18?'hidden':formation<1?'forming':'snagged',
+  const formation=ease(progress(t,2.55+index*.12,3.5+index*.12));
+  const state:TwigState={bird:d.bird,phase:t<2.55+index*.12?'hidden':formation<1?'forming':'snagged',
     grip:startingGrip,base:contact,contact,released:t>=d.release,held:t>=d.grip&&t<d.toss,
     opacity:formation>0?1:0,formation,breakup:0,bleed:0,side:d.side};
   if(t<d.grip)return state;
@@ -177,7 +177,7 @@ export function drawTwigs(c:CanvasRenderingContext2D,t:number,birds:readonly Bir
     const s=twigAt(i,t,birds,releasePoses),d=CLEARS[i];
     if(s.opacity<=0)continue;
     for(const [j,line] of twigStrokes(s).entries()){
-      const amount=ease(progress(t,1.05+i*.18+line.delay*1.7,1.91+i*.18+line.delay*1.7));
+      const amount=ease(progress(t,2.55+i*.12+line.delay*.65,3.22+i*.12+line.delay*.65));
       // Thin shape breaks first; absorbed ink widens only a few pixels along fibers.
       c.setLineDash([lerp(45,2.5,s.breakup),lerp(.7,12,s.breakup)]);
       c.lineDashOffset=j*7+i*13;

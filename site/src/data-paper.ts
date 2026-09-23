@@ -13,7 +13,7 @@ export const DATA_HEADINGS = [
   { text: 'Many data sources', x: 170, y: 128, at: 3.8, reveal: .9, fadeAt: 8, clearAt: 10, size: 26, alpha: .56, center: false },
   { text: 'problem identified', x: 660, y: 128, at: 10.6, reveal: .9, fadeAt: 14.2, clearAt: 16.2, size: 26, alpha: .57, center: false },
   { text: 'plan created', x: 1230, y: 128, at: 13.1, reveal: .9, fadeAt: 17.3, clearAt: 19.5, size: 26, alpha: .56, center: false },
-  { text: 'plan verified by operational leaders', x: 800, y: 706, at: 22.9, reveal: .28, fadeAt: 23.55, clearAt: 25, size: 27, alpha: .6, center: true },
+  { text: 'plan verified by operational leaders', x: 800, y: 706, at: 22.9, reveal: .28, fadeAt: 23.2, clearAt: 23.9, size: 27, alpha: .6, center: true },
 ] as const;
 type Point = [number, number];
 const clamp = (n: number) => Math.min(1, Math.max(0, n));

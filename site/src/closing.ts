@@ -3,14 +3,14 @@ import {CLOSING, SETTINGS, inkRGB} from './config';
 import {ease, progress} from './numbers';
 import {vertex} from './pigment';
 
-/** A final impression on the same sheet. Absolute time makes every seek repeatable. */
+/** The opening title collects from ink, then absorbs into the same sheet. */
 export function closingAt(time:number){
   return {
     name:progress(time,CLOSING.enter,CLOSING.resolved-.18),
     role:progress(time,CLOSING.enter+.3,CLOSING.resolved),
     loss:progress(time,CLOSING.leave,CLOSING.clear),
-    quiet:ease(progress(time,CLOSING.enter-.3,CLOSING.resolved)),
-    visible:time>CLOSING.enter&&time<CLOSING.clear,
+    quiet:1-ease(progress(time,CLOSING.leave+.35,CLOSING.clear+.2)),
+    visible:time>=CLOSING.enter&&time<CLOSING.clear,
   };
 }
 

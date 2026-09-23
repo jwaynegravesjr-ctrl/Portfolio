@@ -1,6 +1,7 @@
 import {type SceneState,FLIGHTS,LEADER_TWEETS,COLLISION_LEG,LEFT_ENTRY,LEFT_LAND,RIGHT_ENTRY,RIGHT_LAND,RESIDENT_RETURN,branchAt,beakPoint} from './score';
 import {type Bezier,bezier,progress,ease,pulse} from './numbers';
 import {ORCHESTRATOR} from './config';
+import {paperTime} from './timing';
 export interface ViewFlags {identities:boolean;clearance:boolean;paths:boolean;guidance:boolean}
 function curve(c:CanvasRenderingContext2D,b:Bezier,amount:number,alpha:number,broken=false){if(amount<=0||alpha<=0)return;c.strokeStyle=`rgba(0,0,0,${alpha})`;c.lineWidth=.95;c.setLineDash(broken?[3,7]:[]);c.beginPath();for(let n=0;n<=120*amount;n++){const p=bezier(b,n/120);if(n)c.lineTo(...p);else c.moveTo(...p);}c.stroke();c.setLineDash([]);}
 function leaderWords(c:CanvasRenderingContext2D,text:string,x:number,y:number,t:number,at:number,until:number,size:number,alpha:number,center=false){
@@ -18,9 +19,9 @@ function leaderWords(c:CanvasRenderingContext2D,text:string,x:number,y:number,t:
   }
 }
 function leaderAnnotations(c:CanvasRenderingContext2D,s:SceneState){
-  const t=s.scoreTime;if(t<18.64||t>=23.12)return;
-  const lead=s.birds[ORCHESTRATOR],presence=pulse(t,18.64,23.12,.2);
-  leaderWords(c,'operational leader',800,183,t,18.64,23,19,.74,true);
+  const t=s.scoreTime;if(t<12.15||t>=13.98)return;
+  const lead=s.birds[ORCHESTRATOR],presence=pulse(t,12.15,13.98,.15);
+  leaderWords(c,'operational leader',800,183,t,12.15,13.96,19,.74,true);
   // A short pen stroke joins the label to the hovering bird without enclosing it.
   c.strokeStyle=`rgba(0,0,0,${presence*.38})`;c.lineWidth=.8;c.beginPath();
   c.moveTo(792,193);c.quadraticCurveTo(800,194,805,201);c.stroke();
@@ -48,13 +49,13 @@ function leaderAnnotations(c:CanvasRenderingContext2D,s:SceneState){
   }
 }
 export function annotations(c:CanvasRenderingContext2D,s:SceneState,flags:ViewFlags){
-  c.clearRect(0,0,1600,900);c.lineCap='round';const t=s.scoreTime,a=s.annotations;
+  c.clearRect(0,0,1600,900);c.lineCap='round';const n=s.scoreTime,t=paperTime(n),a=s.annotations;
   if(flags.guidance){
     leaderAnnotations(c,s);
     // Each completed attempt independently deposits a trace; the shared final leg darkens twice.
-    for(const [start,end] of [[5.82,6.48],[8.82,9.48]])curve(c,COLLISION_LEG,progress(t,start,end),.15*a);
-    const first=FLIGHTS.find(f=>f.label==='first approach')!;curve(c,first.curve,progress(t,first.at,first.until),.11*a);
-    const second=FLIGHTS.find(f=>f.label==='second approach')!;curve(c,second.curve,progress(t,second.at,second.until),.08*a);
+    for(const [start,end] of [[4.7,5.2],[6.25,6.75]])curve(c,COLLISION_LEG,progress(n,start,end),.15*a);
+    const first=FLIGHTS.find(f=>f.label==='first approach')!;curve(c,first.curve,progress(n,first.at,first.until),.11*a);
+    const second=FLIGHTS.find(f=>f.label==='second approach')!;curve(c,second.curve,progress(n,second.at,second.until),.08*a);
     const proposal=FLIGHTS.find(f=>f.label==='test wider gap')!;curve(c,proposal.curve,progress(t,12.7,14.6),(.23-.19*ease(progress(t,19,22)))*a,t>19);
     const left=progress(t,20.95,23.05),right=progress(t,17.5,18.04);
     curve(c,RIGHT_LAND,right,(t<20?.32:.37)*a);curve(c,RIGHT_ENTRY,progress(t,20,22),.3*a);
@@ -66,7 +67,7 @@ export function annotations(c:CanvasRenderingContext2D,s:SceneState,flags:ViewFl
     c.beginPath();c.ellipse(794,451,111,68,-.05,3.65,6.19);c.stroke();
     c.font='italic 12px Georgia';c.fillStyle=`rgba(0,0,0,${inspect*.7})`;c.fillText('room to perch',(edge+885)/2-37,610);
     // The spoken instruction occupies this caption's place briefly; keep their ink from crossing.
-    const sharedCue=LEADER_TWEETS[2],roomCaption=1-pulse(t,sharedCue.at-.12,sharedCue.until+.25,.12);
+    const sharedCue=LEADER_TWEETS[2],roomCaption=1-pulse(n,sharedCue.at-.12,sharedCue.until+.25,.12);
     c.fillStyle=`rgba(0,0,0,${inspect*.7*roomCaption})`;c.fillText('room to land',713,370);
     const revised=ease(progress(t,22.4,23.5))*a;c.strokeStyle=`rgba(0,0,0,${revised*.32})`;
     for(const x of [285,1360]){const y=branchAt(x)+20;c.beginPath();c.moveTo(x-48,y);c.quadraticCurveTo(x,y+4,x+48,y);c.stroke();}
