@@ -28,7 +28,9 @@ export function initScrollMorph(hooks:MorphHooks){
   let width=0,height=0,left=0,navHeight=70,span=1,p=0,queued=0,active=false,resume=false,enabled=true;
   function layout(){
     navHeight=innerWidth<650?58:70;
-    width=Math.min(innerWidth,Math.max(320,innerHeight)*16/9);height=width*9/16;left=(innerWidth-width)/2;
+    const largeDisplay=innerWidth>=1440&&innerHeight>=900;
+    const availableHeight=largeDisplay?innerHeight*.78:Math.max(320,innerHeight);
+    width=Math.min(innerWidth,availableHeight*16/9);height=width*9/16;left=(innerWidth-width)/2;
     span=Math.max(160,Math.min(430,height*.65));
     document.documentElement.style.setProperty('--nav-height',`${navHeight}px`);
     document.documentElement.style.setProperty('--hero-height',`${height}px`);
