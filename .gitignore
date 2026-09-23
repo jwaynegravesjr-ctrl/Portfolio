@@ -1,0 +1,6 @@
+site/node_modules/
+site/dist/
+site/evidence/
+site/tmp/
+site/backups/
+*.log

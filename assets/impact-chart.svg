@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="460" viewBox="0 0 1100 460" role="img" aria-labelledby="title description">
+  <title id="title">Overall reported errors per 1,000 cases, April to August</title>
+  <desc id="description">A full-operation trend, starting at zero on the vertical axis. April 4.07, May 3.29, June 2.62, July 2.10, August 1.42. The tool rolled out at the beginning of July. The decline started before rollout, so this chart does not isolate the tool’s effect.</desc>
+  <g fill="none" stroke="#6e6051" stroke-width=".8" opacity=".2">
+    <path d="M104 70 H1034 M104 125.6 H1034 M104 181.2 H1034 M104 236.8 H1034 M104 292.4 H1034"/>
+  </g>
+  <path d="M104 348 C379 347.3 720 349 1035 348" fill="none" stroke="#211c17" stroke-width="1.4" opacity=".58"/>
+  <g fill="#6e6051" font-family="Arial, Helvetica, sans-serif" font-size="16">
+    <text x="104" y="29" font-size="17" letter-spacing="1.2">REPORTED ERRORS PER 1,000 CASES</text>
+    <g text-anchor="end"><text x="79" y="76">5</text><text x="79" y="131.6">4</text><text x="79" y="187.2">3</text><text x="79" y="242.8">2</text><text x="79" y="298.4">1</text><text x="79" y="354">0</text></g>
+  </g>
+  <path d="M767 67 C766.2 156 767.8 266 767 347" fill="none" stroke="#6e6051" stroke-width="1.1" stroke-dasharray="4 7" opacity=".58"/>
+  <text x="787" y="79" fill="#6e6051" font-family="Georgia, 'Times New Roman', serif" font-size="19" font-style="italic">July rollout begins</text>
+  <path d="M155 121.708 Q257 143 359 165.076 Q461 184 563 202.328 Q665 218 767 231.24 Q869 248 971 269.048" fill="none" stroke="#211c17" stroke-width="3.6" stroke-linecap="round"/>
+  <path d="M172 124.8 Q227 136.8 272 146.1 M432 178.9 Q486 189.6 536 197.2 M809 239 Q861 248 898 255.6" fill="none" stroke="#211c17" stroke-width=".7" stroke-linecap="round" opacity=".42"/>
+  <g fill="#efe7d7" stroke="#211c17" stroke-width="2.7">
+    <path d="M161.2 121.7 C161.8 125.1 158.3 128.3 154.7 127.9 C151.1 127.6 148.9 124.9 149.2 121.3 C149.4 117.8 152.8 115.4 156.1 115.8 C159.2 116.1 161.4 118.5 161.2 121.7Z"/>
+    <circle cx="359" cy="165.076" r="5.9"/>
+    <circle cx="563" cy="202.328" r="6.2"/>
+    <circle cx="767" cy="231.24" r="5.9"/>
+    <path d="M977.1 269 C977.6 272.6 974.2 275.3 970.9 275.1 C967.1 275 964.6 272.7 964.9 268.9 C965.1 265.4 968.3 262.8 971.8 263.1 C975.1 263.4 977.3 265.7 977.1 269Z"/>
+  </g>
+  <g fill="#211c17" font-family="Georgia, 'Times New Roman', serif" font-size="28" text-anchor="middle">
+    <text x="155" y="97">4.07</text><text x="359" y="141">3.29</text><text x="563" y="178">2.62</text><text x="767" y="207">2.10</text><text x="971" y="245">1.42</text>
+  </g>
+  <g fill="#211c17" font-family="Georgia, 'Times New Roman', serif" font-size="22" text-anchor="middle">
+    <text x="155" y="387">April</text><text x="359" y="387">May</text><text x="563" y="387">June</text><text x="767" y="387">July</text><text x="971" y="387">August</text>
+  </g>
+  <text x="104" y="435" fill="#6e6051" font-family="Georgia, 'Times New Roman', serif" font-size="17" font-style="italic">The earlier months stay in view: improvement was already underway before July.</text>
+</svg>

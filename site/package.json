@@ -1,0 +1,21 @@
+{
+  "name": "j-wayne-graves-shared-perch-website",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "build:pages": "tsc --noEmit && vite build --mode pages",
+    "preview": "vite preview --host 127.0.0.1",
+    "validate": "tsc --noEmit && node scripts/validate.mjs",
+    "check:browser": "node scripts/check-site-ink.cjs",
+    "capture": "node scripts/capture.cjs"
+  },
+  "dependencies": { "three": "0.180.0" },
+  "devDependencies": {
+    "@types/three": "0.180.0",
+    "typescript": "5.9.2",
+    "vite": "8.3.0"
+  }
+}

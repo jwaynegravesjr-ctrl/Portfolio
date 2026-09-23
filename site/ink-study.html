@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#efe7d7">
+  <link rel="icon" href="data:,">
+  <title>Ink Formation Study — Shared Perch</title>
+  <noscript><style>.study-controls{display:none!important}</style></noscript>
+  <link rel="stylesheet" href="/src/ink-study.css">
+  <script type="module" src="/src/ink-study.ts"></script>
+</head>
+<body>
+  <main class="study" aria-labelledby="study-heading">
+    <nav class="study-nav" aria-label="Study navigation">
+      <a href="/">Shared Perch</a>
+      <span>Ink formation study</span>
+    </nav>
+
+    <div class="study-controls" aria-label="Animation controls">
+      <button id="study-replay" type="button">Replay formation</button>
+      <button id="study-pause" type="button" aria-pressed="false">Pause</button>
+    </div>
+
+    <article class="study-sheet">
+      <h1 id="study-heading" data-study-block="heading" data-state="waiting">What the numbers show.</h1>
+      <p class="study-copy" data-study-block="paragraph" data-state="waiting">These figures cover the full operation. The downward trend began before the July rollout, so this comparison does not isolate the tool’s effect or measure a genetics-only improvement.</p>
+
+      <svg class="perch-rule" viewBox="0 0 800 42" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M3 21 C142 17 215 26 343 22 S594 15 797 20" />
+        <path d="M128 21 Q139 13 144 5 M139 16 Q150 17 156 11 M533 20 Q623 18 712 20" />
+      </svg>
+
+      <table class="monthly-figures" data-study-block="table" data-state="waiting">
+        <caption data-study-part="caption">Full-operation monthly figures.</caption>
+        <thead>
+          <tr data-study-part="headings">
+            <th scope="col">Month</th>
+            <th scope="col">Reported errors per 1,000 cases</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-study-part="row"><th scope="row">April</th><td>4.07</td></tr>
+          <tr data-study-part="row"><th scope="row">May</th><td>3.29</td></tr>
+          <tr data-study-part="row"><th scope="row">June</th><td>2.62</td></tr>
+          <tr data-study-part="row"><th scope="row">July</th><td>2.10</td></tr>
+          <tr data-study-part="row"><th scope="row">August</th><td>1.42</td></tr>
+        </tbody>
+      </table>
+
+      <p class="source-note">Source: my reported totals for complete calendar months. There was no reported change in auditing or error reporting. These figures have not been independently verified.</p>
+    </article>
+  </main>
+</body>
+</html>
