@@ -24,6 +24,8 @@ export type InkBlockSpec = {
   triggerLineViewportHeights?: number;
   finishLineViewportHeights?: number;
   completeOnScroll?: HTMLElement;
+  /** A skipped component waits, and visible time alone advances it. */
+  visibleOnly?: boolean;
 };
 
 export type InkFormationDiagnostics = {
@@ -41,9 +43,9 @@ export type InkFormationDiagnostics = {
 
 export type InkBlockState = 'waiting' | 'active' | 'paused' | 'complete' | 'fallback';
 export type InkFormationApi = {
-  replay(): void;
-  pause(): void;
-  play(): void;
+  replay(id?: string): void;
+  pause(id?: string): void;
+  play(id?: string): void;
   seek(id: string, seconds: number): void;
   diagnostics(): InkFormationDiagnostics;
   dispose(): void;
@@ -342,6 +344,7 @@ export function createInkFormation(options: {
   let scene: T.Scene | null = null, canvas: HTMLCanvasElement | null = null;
   let fallbackReason: string | null = null, raf = 0, disposed = false, paused = false, fontsReady = false;
   let pausedByVisibility = false;
+  const heldIds = new Set<string>();
   const listeners: Array<() => void> = [];
   const inkCache = new Map<string, T.Color>();
   const inkColor = (css: string) => { let value = inkCache.get(css); if (!value) { value = new T.Color(css); inkCache.set(css, value); } return value; };
@@ -501,7 +504,7 @@ export function createInkFormation(options: {
   const completeBlock = (block: InkBlock) => { clearLayers(block); block.elapsed = block.spec.duration; setState(block, 'complete'); };
   const beginBlock = (block: InkBlock) => {
     if (block.state !== 'waiting' || fallbackReason) return false;
-    try { buildBlock(block); block.elapsed = 0; block.lastTick = 0; setState(block, paused ? 'paused' : 'active'); return true; }
+    try { buildBlock(block); block.elapsed = 0; block.lastTick = 0; setState(block, paused || heldIds.has(block.spec.id) ? 'paused' : 'active'); return true; }
     catch (error) { console.warn('Ink layer setup failed', error); fallback('setup-failed'); return false; }
   };
   const positionFloorSeconds = (block: InkBlock) => {
@@ -518,13 +521,18 @@ export function createInkFormation(options: {
     for (const block of blocks) if (block.state === 'paused') setLayerProgress(block);
     const started: InkBlock[] = [];
     for (const block of blocks) {
+      if (block.spec.visibleOnly && block.state === 'active' && !currentVisibility(block)) {
+        setState(block, 'paused'); block.lastTick = 0;
+      } else if (block.spec.visibleOnly && block.state === 'paused' && !paused && !heldIds.has(block.spec.id) && currentVisibility(block)) {
+        setState(block, 'active'); block.lastTick = performance.now();
+      }
       if (block.state !== 'waiting') continue;
       const rect = block.spec.element.getBoundingClientRect();
-      if (rect.bottom <= 0) { completeBlock(block); continue; }
+      if (rect.bottom <= 0) { if (!block.spec.visibleOnly) completeBlock(block); continue; }
       const finishLine = block.spec.finishLineViewportHeights;
       if (!paused && finishLine !== undefined && rect.top <= innerHeight * finishLine) { completeBlock(block); continue; }
       const triggerLine = block.spec.triggerLineViewportHeights ?? .8;
-      if (rect.top <= innerHeight * triggerLine && beginBlock(block)) started.push(block);
+      if (rect.top <= innerHeight * triggerLine && (!block.spec.visibleOnly || currentVisibility(block)) && beginBlock(block)) started.push(block);
     }
     if (replay) for (const block of blocks) {
       const triggerLine = block.spec.triggerLineViewportHeights ?? .8;
@@ -553,10 +561,12 @@ export function createInkFormation(options: {
     if (active && blocks.some(block => block.state === 'active')) raf = requestAnimationFrame(frame);
   };
   const requestRender = () => { if (!fallbackReason && !disposed && !raf && !document.hidden) raf = requestAnimationFrame(frame); };
-  const pause = () => {
+  const pause = (id?: string) => {
     if (fallbackReason || disposed) return;
-    paused = true; const now = performance.now();
+    if (id) heldIds.add(id); else paused = true;
+    const now = performance.now();
     for (const block of blocks) {
+      if (id && block.spec.id !== id) continue;
       if (block.state !== 'active') continue;
       block.elapsed += Math.max(0, (now - block.lastTick) / 1000); block.lastTick = now;
       if (block.elapsed >= block.spec.duration) { completeBlock(block); continue; }
@@ -564,16 +574,20 @@ export function createInkFormation(options: {
     }
     if (raf) cancelAnimationFrame(raf); raf = 0; render();
   };
-  const play = () => {
+  const play = (id?: string) => {
     if (fallbackReason || disposed) return;
-    paused = false;
-    for (const block of blocks) if (block.state === 'paused') { setState(block, 'active'); block.lastTick = performance.now(); }
+    if (id) heldIds.delete(id); else paused = false;
+    for (const block of blocks) if ((!id || block.spec.id === id) && block.state === 'paused' && !paused && !heldIds.has(block.spec.id) && (!block.spec.visibleOnly || currentVisibility(block))) { setState(block, 'active'); block.lastTick = performance.now(); }
     scanTriggers(); requestRender();
   };
-  const replay = () => {
+  const replay = (id?: string) => {
     if (!fontsReady || fallbackReason || disposed) return;
-    paused = false;
-    for (const block of blocks) { clearLayers(block); block.elapsed = 0; block.lastTick = 0; setState(block, 'waiting'); hideNative(block); }
+    if (!id) paused = false;
+    if (id) heldIds.delete(id); else heldIds.clear();
+    for (const block of blocks) {
+      if (id && block.spec.id !== id) continue;
+      clearLayers(block); block.elapsed = 0; block.lastTick = 0; setState(block, 'waiting'); hideNative(block);
+    }
     scanTriggers(true); requestRender();
   };
   const seek = (id: string, seconds: number) => {
@@ -588,11 +602,19 @@ export function createInkFormation(options: {
   const onScroll = () => { if (!fallbackReason && !disposed) { scanTriggers(); requestRender(); } };
   const onResize = () => {
     if (fallbackReason || disposed) return;
-    for (const block of blocks) if (block.state === 'active' || block.state === 'paused') completeBlock(block);
+    const rebuild = blocks.filter(block => block.spec.visibleOnly && (block.state === 'active' || block.state === 'paused'))
+      .map(block => ({ block, elapsed: block.elapsed, state: block.state }));
+    for (const block of blocks) if (!block.spec.visibleOnly && (block.state === 'active' || block.state === 'paused')) completeBlock(block);
     pixelRatio = Math.min(pixelLimit, window.devicePixelRatio || 1);
     if (renderer && camera) {
       camera.right = innerWidth; camera.top = innerHeight; camera.bottom = 0; camera.updateProjectionMatrix();
       renderer.setPixelRatio(pixelRatio); renderer.setSize(innerWidth, innerHeight, false); render();
+    }
+    for (const item of rebuild) {
+      try { buildBlock(item.block); item.block.elapsed = item.elapsed; setLayerProgress(item.block);
+        setState(item.block, item.state === 'active' && currentVisibility(item.block) && !paused ? 'active' : 'paused');
+        item.block.lastTick = performance.now();
+      } catch (error) { console.warn('Ink table resize failed', error); fallback('setup-failed'); return; }
     }
     scanTriggers();
   };
@@ -609,7 +631,7 @@ export function createInkFormation(options: {
     const marked = control.closest<HTMLElement>('[data-ink]');
     const block = (marked && blocks.find(candidate => candidate.spec.element === marked))
       ?? blocks.find(candidate => control.contains(candidate.spec.element) || candidate.spec.element.contains(control));
-    if (block && block.state !== 'complete') { completeBlock(block); render(); }
+    if (block && !block.spec.visibleOnly && block.state !== 'complete') { completeBlock(block); render(); }
   };
   const diagnostics = (): InkFormationDiagnostics => ({
     supported: !fallbackReason, fallback: fallbackReason, pixelRatio,
@@ -660,7 +682,7 @@ export function createInkFormation(options: {
       const element = target.closest<HTMLElement>('[data-ink]');
       const block = (element && blocks.find(candidate => candidate.spec.element === element))
         ?? blocks.find(candidate => candidate.spec.element.contains(target) || target.contains(candidate.spec.element));
-      if (block && block.state !== 'complete') { completeBlock(block); render(); }
+      if (block && !block.spec.visibleOnly && block.state !== 'complete') { completeBlock(block); render(); }
     });
     renderer.render(scene, camera);
     document.fonts.ready.then(() => {

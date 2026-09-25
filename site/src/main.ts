@@ -1,103 +1,215 @@
-import * as T from 'three';import {SETTINGS,CAST,inkRGB} from './config';
-import {paintBird} from './birds';import {surface,wipe,branchDrawing,paperDrawing} from './sheet';import {layer,fields,vertex} from './pigment';
-import {evaluateScene,evaluateScore,birdAt,endInk,INK_RESTS,EVENTS,CLEARS,type BirdState} from './score';import {annotations,type ViewFlags} from './notes';
-import {scoreTime,playbackTime,paperTime} from './timing';
-import {drawDataPaper,DATA_HEADINGS,dataHeadingOpacity} from './data-paper';
-import {drawTwigs} from './clearing';
-import {closingTitle,closingAt,paintClosing} from './closing';
-import {ease,progress} from './numbers';
-import {initScrollMorph} from './scroll-morph';
-import {initSiteEffects} from './site-effects';
-const el=<E extends HTMLElement>(id:string)=>document.getElementById(id) as E;
-const host=el('page'),still=el<HTMLCanvasElement>('still'),flags:ViewFlags={identities:false,clearance:false,paths:false,guidance:true};
-const stage=new T.Scene(),camera=new T.OrthographicCamera(-800,800,450,-450,.1,50);camera.position.z=10;
-let renderer:T.WebGLRenderer|undefined,running=false,time=0,request=0,previous=0,frameCount=0,destroyed=false,morphProgress=0;const intervals:number[]=[];
-const morphFields=new Map<number,T.DataTexture>();
-const paper=paperDrawing(),paperMap=new T.CanvasTexture(paper);paperMap.colorSpace=T.SRGBColorSpace;
-const paperPlane=new T.Mesh(new T.PlaneGeometry(1600,900),new T.MeshBasicMaterial({map:paperMap,depthTest:false,depthWrite:false}));stage.add(paperPlane);
-const dataPaper=document.createElement('canvas');dataPaper.width=1600;dataPaper.height=900;const dc=dataPaper.getContext('2d')!;
-const dataOriginal=document.createElement('canvas');dataOriginal.width=1600;dataOriginal.height=900;const originalData=dataOriginal.getContext('2d')!;
-const dataMap=new T.CanvasTexture(dataPaper);dataMap.colorSpace=T.NoColorSpace;
-const dataMaterial=new T.ShaderMaterial({vertexShader:vertex,fragmentShader:'uniform sampler2D marks;uniform vec3 inkColor;uniform float strength;varying vec2 uvInk;void main(){gl_FragColor=vec4(inkColor,texture2D(marks,uvInk).a*strength);}',uniforms:{marks:{value:dataMap},inkColor:{value:new T.Vector3(...inkRGB(SETTINGS.note))},strength:{value:1.1}},transparent:true,depthTest:false,depthWrite:false});
-const dataPlane=new T.Mesh(new T.PlaneGeometry(1600,900),dataMaterial);dataPlane.renderOrder=5;stage.add(dataPlane);let dataStamp=-1;
-const snagPaper=document.createElement('canvas');snagPaper.width=1600;snagPaper.height=900;const sc=snagPaper.getContext('2d')!;
-const snagMap=new T.CanvasTexture(snagPaper);snagMap.colorSpace=T.NoColorSpace;
-const snagMaterial=new T.ShaderMaterial({vertexShader:vertex,fragmentShader:'uniform sampler2D marks;uniform vec3 inkColor;uniform float strength;varying vec2 uvInk;void main(){gl_FragColor=vec4(inkColor,texture2D(marks,uvInk).a*strength);}',uniforms:{marks:{value:snagMap},inkColor:{value:new T.Vector3(...inkRGB(SETTINGS.ink))},strength:{value:1}},transparent:true,depthTest:false,depthWrite:false});
-const snagPlane=new T.Mesh(new T.PlaneGeometry(1600,900),snagMaterial);snagPlane.renderOrder=41;stage.add(snagPlane);let snagStamp=-1;
-const twig=surface(1600,290),bloom=surface(1600,290);branchDrawing(twig,0);branchDrawing(bloom,0,true);
-const branch=layer(twig,20,23,'branch'),flowers=layer(bloom,40,39,'flower');branch.place(0,360);flowers.place(0,360);stage.add(branch.mesh,flowers.mesh);
-function draw(i:number,s:ReturnType<typeof surface>,p:BirdState){wipe(s);for(const c of [s.c,s.m]){c.save();c.translate(160,216);}paintBird(s.c,s.m,CAST[i],p);s.c.restore();s.m.restore();}
-const birds=CAST.map((b,i)=>{
-  const s=surface(320,288);draw(i,s,birdAt(i,0));const ink=layer(s,30+i*.01,b.seed);const imprints=new Map<number,T.DataTexture>([[-1,ink.initialField]]);
-  draw(i,s,birdAt(i,endInk(i)));imprints.set(100+i,fields(s,b.seed));
-  INK_RESTS.forEach((d,k)=>{if(d.bird===i){draw(i,s,birdAt(i,d.at));imprints.set(k,fields(s,b.seed));}});
-  stage.add(ink.mesh);return {ink,imprints,key:''};
-});
-const notes=document.createElement('canvas');notes.width=1600;notes.height=900;const nc=notes.getContext('2d')!;
-const notesMap=new T.CanvasTexture(notes);notesMap.colorSpace=T.NoColorSpace;
-const noteMaterial=new T.ShaderMaterial({vertexShader:vertex,fragmentShader:'uniform sampler2D marks;uniform vec3 inkColor;uniform float strength;varying vec2 uvInk;void main(){gl_FragColor=vec4(inkColor,texture2D(marks,uvInk).a*strength);}',uniforms:{marks:{value:notesMap},inkColor:{value:new T.Vector3(...inkRGB(SETTINGS.note))},strength:{value:1.1}},transparent:true,depthTest:false,depthWrite:false});
-const notePlane=new T.Mesh(new T.PlaneGeometry(1600,900),noteMaterial);notePlane.renderOrder=50;stage.add(notePlane);
-const ending=closingTitle();stage.add(ending.mesh);
-const reduced=matchMedia('(prefers-reduced-motion:reduce)');let branchStamp='';
-const motionDisabled=()=>document.documentElement.dataset.motion?document.documentElement.dataset.motion==='off':reduced.matches;
-const clearingReleasePoses=CLEARS.map(action=>birdAt(action.bird,action.toss));
-function prepareDataPaper(t:number,poses:BirdState[]){
-  const dataTime=Math.floor(paperTime(t)*24)/24;if(dataTime!==dataStamp){drawDataPaper(originalData,dataTime);dataStamp=dataTime;}
-  dc.clearRect(0,0,1600,900);dc.drawImage(dataOriginal,0,0);
-  // The ink birds shelter the worksheet, while the underlying paper fibers remain fixed.
-  dc.save();dc.globalCompositeOperation='destination-out';
-  poses.forEach((p,i)=>{if(p.formation>.9&&p.dispersal<.1)dc.drawImage(birds[i].ink.s.mask,p.x-160,p.y-216);});dc.restore();
-}
-function ui(){const s=evaluateScene(time);el('labels').style.opacity=String(Math.min(1,s.registration/10)*(1-ease(progress(morphProgress,0,.12))));el('labels').setAttribute('aria-hidden',s.registration>8&&morphProgress<.02?'false':'true');el('play').setAttribute('aria-label',running?'Pause animation':'Play animation');}
-export function renderAt(seconds:number){
-  if(!renderer||destroyed)return;time=Math.max(0,Math.min(SETTINGS.length,seconds));const s=evaluateScene(time),authored=s.scoreTime;
-  const closing=ending.update(authored,host.clientWidth);
-  const absorption=ease(progress(morphProgress,.015,.5)),fade=1-ease(progress(morphProgress,0,.27));
-  ending.mesh.material.uniforms.loss.value=Math.max(closing.loss,absorption);
-  dataMaterial.uniforms.strength.value=1.1*(1-closing.quiet)*fade;
-  noteMaterial.uniforms.strength.value=1.1*fade;snagMaterial.uniforms.strength.value=fade;
-  const snagTime=Math.min(authored,24);if(snagTime!==snagStamp){drawTwigs(sc,snagTime,s.birds,clearingReleasePoses);snagMap.needsUpdate=true;snagStamp=snagTime;}snagPlane.visible=authored>.5&&authored<24;
-  for(let i=0;i<8;i++){const p=s.birds[i],b=birds[i],key=JSON.stringify([p.spread,p.flap,p.pitch,p.head,p.breath,p.tail,p.facing,p.feet,p.ruffle,p.signal,p.tweet]);if(key!==b.key){draw(i,b.ink.s,p);b.ink.art.needsUpdate=true;b.key=key;}
-    const u=b.ink.material.uniforms;u.grow.value=p.formation;u.loss.value=Math.max(p.dispersal,absorption);u.pool.value=p.pool*(1-absorption);u.field.value=morphFields.get(i)||b.imprints.get(p.imprint)||b.ink.initialField;
-    b.ink.place(p.x-160,p.y-216);b.ink.mesh.visible=(p.formation>0&&p.dispersal<1)||p.pool>0;b.ink.mesh.renderOrder=p.dispersal>0?10+i*.01:30+i*.01;
+import * as T from 'three';
+import { CONFIG, nameAmount, titleAmount, remainingDebris, useTableObservations } from './approved-timeline';
+import { inspectArtwork, renderChart, renderHero, setupHero } from './approved-art';
+import { initScrollMorph } from './scroll-morph';
+import { initSiteEffects } from './site-effects';
+
+type State = 'unstarted' | 'playing' | 'paused' | 'completed';
+type Draw = (context: CanvasRenderingContext2D, width: number, height: number, time: number) => void;
+
+/** One drawing surface per component; WebGL adds a fixed-page grain to the Canvas artwork. */
+class InkSurface {
+  readonly source = document.createElement('canvas');
+  readonly fallback = document.createElement('canvas');
+  readonly context = this.source.getContext('2d', { alpha:false })!;
+  readonly fallbackContext = this.fallback.getContext('2d', { alpha:false })!;
+  renderer?: T.WebGLRenderer;
+  texture?: T.CanvasTexture;
+  material?: T.ShaderMaterial;
+  mesh?: T.Mesh;
+  scene?: T.Scene;
+  camera?: T.OrthographicCamera;
+  lost = false;
+  width = 0; height = 0; ratio = 1; time = 0;
+  private lostHandler?: (event: Event) => void;
+  private restoredHandler?: (event: Event) => void;
+  constructor(readonly element: HTMLElement, readonly draw: Draw, readonly resized?: (width:number,height:number,ratio:number)=>void) {
+    this.fallback.setAttribute('aria-hidden','true');
+    this.element.dataset.renderer='canvas';
+    this.element.append(this.fallback);
+    this.resize();
+    if (!new URLSearchParams(location.search).has('canvas')) this.upgrade();
   }
-  prepareDataPaper(authored,s.birds);dataMap.needsUpdate=true;
-  const stamp=EVENTS.some(e=>authored>=e.time&&authored<e.time+1.6)?String(authored):'rest';
-  if(stamp!==branchStamp){branchDrawing(twig,stamp==='rest'?0:authored);branch.art.needsUpdate=true;branchStamp=stamp;}
-  for(const ink of [branch,flowers]){ink.material.uniforms.grow.value=s.branchInk;ink.material.uniforms.loss.value=Math.max(s.branchLoss,ease(progress(morphProgress,0,ink===branch?.14:.32)));ink.mesh.visible=s.branchInk>0&&s.branchLoss<1;}
-  annotations(nc,s,flags);
-  // Guidance is last in the layer stack, with actual silhouettes spared for visual clarity.
-  nc.save();nc.globalCompositeOperation='destination-out';s.birds.forEach((p,i)=>{if(p.formation>.9&&p.dispersal<.1)nc.drawImage(birds[i].ink.s.mask,p.x-160,p.y-216+s.registration);});nc.restore();
-  notesMap.needsUpdate=true;notePlane.position.y=s.registration;renderer.render(stage,camera);frameCount++;ui();
-}
-function frame(now:number){if(!running||destroyed)return;if(previous){const dt=(now-previous)/1000;time=(time+dt)%SETTINGS.length;intervals.push(dt*1000);if(intervals.length>300)intervals.shift();}previous=now;renderAt(time);request=requestAnimationFrame(frame);}
-export function play(){if(!renderer||destroyed||morphProgress>0)return;running=true;previous=0;el('play').textContent='Pause';el('play').setAttribute('aria-label','Pause animation');cancelAnimationFrame(request);request=requestAnimationFrame(frame);}
-export function pause(){running=false;cancelAnimationFrame(request);el('play').textContent='Play';el('play').setAttribute('aria-label','Play animation');}
-export function seek(t:number){pause();renderAt(t);}
-function fallback(){
-  still.width=1600;still.height=900;still.classList.add('visible');const c=still.getContext('2d')!;c.drawImage(paper,0,0);const s=evaluateScore(20.4);
-  function imprint(source:HTMLCanvasElement,x:number,y:number,w:number,h:number,color=SETTINGS.ink){const temp=document.createElement('canvas');temp.width=source.width;temp.height=source.height;const tc=temp.getContext('2d')!;tc.drawImage(source,0,0);tc.globalCompositeOperation='source-in';tc.fillStyle=color;tc.fillRect(0,0,temp.width,temp.height);c.drawImage(temp,x,y,w,h);}
-  s.birds.forEach((p,i)=>draw(i,birds[i].ink.s,p));prepareDataPaper(20.4,s.birds);c.globalAlpha=.066;imprint(dataPaper,0,0,1600,900,SETTINGS.note);c.globalAlpha=1;branchDrawing(twig,20.4);imprint(twig.ink,0,360,1600,290);s.birds.forEach((p,i)=>imprint(birds[i].ink.s.ink,p.x-160,p.y-216,320,288));imprint(bloom.ink,0,360,1600,290);paintClosing(c,host.clientWidth<600,SETTINGS.ink);
-  el('play').textContent='Still drawing';el<HTMLButtonElement>('play').disabled=true;
-}
-function fit(){if(!renderer)return;renderer.setPixelRatio(Math.min(devicePixelRatio||1,SETTINGS.pixelRatio));renderer.setSize(host.clientWidth,host.clientHeight,false);renderAt(time);}
-const observer=new ResizeObserver(fit);
-function preference(){if(motionDisabled())seek(playbackTime(20.4));else play();}
-export function dispose(){pause();destroyed=true;observer.disconnect();reduced.removeEventListener('change',preference);morph.dispose();site.dispose();window.removeEventListener('perch:motion',motionPreference);for(const f of morphFields.values())f.dispose();for(const b of birds){for(const f of b.imprints.values())if(f!==b.ink.initialField)f.dispose();b.ink.dispose();}ending.dispose();branch.dispose();flowers.dispose();snagMap.dispose();snagMaterial.dispose();snagPlane.geometry.dispose();dataMap.dispose();dataMaterial.dispose();dataPlane.geometry.dispose();notesMap.dispose();noteMaterial.dispose();notePlane.geometry.dispose();paperMap.dispose();paperPlane.geometry.dispose();paperPlane.material.dispose();renderer?.dispose();renderer?.domElement.remove();}
-try{renderer=new T.WebGLRenderer({antialias:true,powerPreference:'low-power'});renderer.debug.checkShaderErrors=true;renderer.debug.onShaderError=(gl,p,v,f)=>{console.error('Ink shader failed',gl.getProgramInfoLog(p),gl.getShaderInfoLog(v),gl.getShaderInfoLog(f));pause();renderer!.domElement.style.display='none';fallback();};renderer.outputColorSpace=T.SRGBColorSpace;renderer.setClearColor(SETTINGS.paper);renderer.domElement.setAttribute('aria-hidden','true');host.prepend(renderer.domElement);renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();pause();renderer!.domElement.style.display='none';fallback();});observer.observe(host);fit();preference();}catch(e){console.info('Using the static ink drawing',e);fallback();}
-el('play').addEventListener('click',()=>running?pause():play());
-function setMorph(value:number){
-  if(value===morphProgress)return;
-  if(value>0&&morphProgress===0&&renderer){
-    const s=evaluateScene(time);s.birds.forEach((p,i)=>{if(p.formation>.1&&p.dispersal===0)morphFields.set(i,fields(birds[i].ink.s,CAST[i].seed));});
+  resize() {
+    const rect = this.element.getBoundingClientRect();
+    const width = Math.round(rect.width), height = Math.round(rect.height);
+    const ratio = Math.min(devicePixelRatio || 1, CONFIG.maxDpr);
+    if (!width || !height || (width === this.width && height === this.height && ratio === this.ratio)) return false;
+    this.width = width; this.height = height; this.ratio = ratio;
+    this.source.width = this.fallback.width = Math.round(width * ratio);
+    this.source.height = this.fallback.height = Math.round(height * ratio);
+    this.resized?.(width,height,ratio);
+    if (this.renderer && this.material && this.texture) {
+      this.renderer.setPixelRatio(ratio); this.renderer.setSize(width,height,false);
+      (this.material.uniforms.uResolution.value as T.Vector2).set(this.source.width,this.source.height);
+      this.texture.needsUpdate = true;
+    }
+    return true;
   }
-  morphProgress=value;
-  if(value===0){for(const f of morphFields.values())f.dispose();morphFields.clear();}
-  if(!renderer)still.style.opacity=String(1-ease(progress(value,0,.4)));
-  renderAt(time);
+  render(time:number) {
+    this.time = time;
+    const context = this.context;
+    context.setTransform(this.ratio,0,0,this.ratio,0,0);
+    context.globalAlpha = 1; context.globalCompositeOperation = 'source-over';
+    context.fillStyle = this.element.id === 'hero-stage' ? CONFIG.heroPaper : CONFIG.paper;
+    context.fillRect(0,0,this.width,this.height);
+    context.lineCap = 'round'; context.lineJoin = 'round';
+    this.draw(context,this.width,this.height,time);
+    if (this.renderer && !this.lost && this.texture) {
+      try {
+        this.texture.needsUpdate = true;
+        this.renderer.render(this.scene!,this.camera!);
+      } catch (error) { this.disable(error); }
+    }
+    if (!this.renderer || this.lost) {
+      this.fallbackContext.setTransform(1,0,0,1,0,0);
+      this.fallbackContext.drawImage(this.source,0,0);
+    }
+  }
+  private disable(error:unknown) {
+    this.lost = true;
+    if (this.renderer) this.renderer.domElement.style.display = 'none';
+    this.fallback.style.visibility = 'visible';
+    this.fallbackContext.drawImage(this.source,0,0);
+    this.element.dataset.renderer = 'canvas';
+    console.warn('Ink illustration is using Canvas rendering.', error);
+  }
+  private upgrade() {
+    let renderer:T.WebGLRenderer|undefined;
+    try {
+      renderer = new T.WebGLRenderer({ alpha:false, antialias:false, powerPreference:'low-power' });
+      renderer.outputColorSpace = T.LinearSRGBColorSpace; renderer.toneMapping = T.NoToneMapping;
+      renderer.setPixelRatio(this.ratio); renderer.setSize(this.width,this.height,false);
+      renderer.debug.checkShaderErrors = true;
+      renderer.debug.onShaderError = (gl,program,vertex,fragment) => {
+        console.error('Ink shader error', gl.getProgramInfoLog(program),gl.getShaderInfoLog(vertex),gl.getShaderInfoLog(fragment));
+        this.disable('shader error');
+      };
+      const texture = new T.CanvasTexture(this.source);
+      texture.minFilter = texture.magFilter = T.LinearFilter;
+      texture.generateMipmaps = false; texture.colorSpace = T.NoColorSpace;
+      const material = new T.ShaderMaterial({
+        depthTest:false, depthWrite:false,
+        uniforms:{ uTex:{value:texture}, uResolution:{value:new T.Vector2(this.source.width,this.source.height)} },
+        vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
+        fragmentShader:`precision highp float;varying vec2 vUv;uniform sampler2D uTex;uniform vec2 uResolution;
+          float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+          void main(){vec2 px=1./uResolution;vec3 c=texture2D(uTex,vUv).rgb;
+            float lum=dot(c,vec3(.299,.587,.114));float grain=hash(floor(vUv*uResolution));
+            float edge=abs(lum-dot(texture2D(uTex,vUv+px*vec2(.65,.4)).rgb,vec3(.299,.587,.114)));
+            c-=vec3(edge*.075*(.3+grain));c+=vec3((grain-.5)*.009*(.35+lum));
+            gl_FragColor=vec4(clamp(c,0.,1.),1.);}`,
+      });
+      const scene = new T.Scene(), camera = new T.OrthographicCamera(-1,1,1,-1,0,1);
+      const mesh = new T.Mesh(new T.PlaneGeometry(2,2),material); scene.add(mesh);
+      renderer.domElement.setAttribute('aria-hidden','true'); this.element.append(renderer.domElement);
+      this.renderer=renderer; this.texture=texture; this.material=material; this.mesh=mesh; this.scene=scene; this.camera=camera;
+      this.fallback.style.visibility='hidden'; this.element.dataset.renderer='webgl';
+      this.lostHandler=(event:Event)=>{ event.preventDefault(); this.disable('WebGL context lost'); };
+      renderer.domElement.addEventListener('webglcontextlost',this.lostHandler);
+      this.restoredHandler=()=>{this.lost=false;renderer!.domElement.style.display='block';this.fallback.style.visibility='hidden';this.render(this.time);};
+      renderer.domElement.addEventListener('webglcontextrestored',this.restoredHandler);
+    } catch(error) { renderer?.dispose(); this.disable(error); }
+  }
+  dispose() {
+    if(this.lostHandler) this.renderer?.domElement.removeEventListener('webglcontextlost',this.lostHandler);
+    if(this.restoredHandler) this.renderer?.domElement.removeEventListener('webglcontextrestored',this.restoredHandler);
+    this.mesh?.geometry.dispose(); this.material?.dispose(); this.texture?.dispose(); this.renderer?.dispose();
+    this.renderer?.domElement.remove(); this.fallback.remove();
+  }
 }
-const morph=initScrollMorph({getState:()=>({time,running,available:!!renderer}),pause,play,setProgress:setMorph});
-function motionPreference(event:Event){const enabled=(event as CustomEvent<{enabled:boolean}>).detail.enabled;if(!enabled){pause();renderAt(playbackTime(20.4));}else if(morphProgress===0)play();}
-window.addEventListener('perch:motion',motionPreference);
-const site=initSiteEffects();
-if(import.meta.env.DEV||new URLSearchParams(location.search).has('inspect'))(window as unknown as Record<string,unknown>).sharedPerch={evaluateScene,renderAt,play,pause,seek,scoreTime,playbackTime,dispose,setFlags(f:Partial<ViewFlags>){Object.assign(flags,f);renderAt(time);},diagnostics(){const authored=scoreTime(time);return {time,running,frameCount,morphProgress,state:evaluateScene(time),closing:closingAt(authored),headingAlphas:DATA_HEADINGS.map(h=>dataHeadingOpacity(Math.floor(paperTime(authored)*24)/24,h)),intervals:[...intervals],calls:renderer?.info.render.calls,textures:renderer?.info.memory.textures,available:!!renderer,positions:birds.map(b=>[b.ink.mesh.position.x,b.ink.mesh.position.y]),visible:birds.filter(b=>b.ink.mesh.visible).length};}};
+
+type Clock = { name:'hero'|'chart'; surface:InkSurface; duration:number; time:number; state:State; held:boolean; threshold:number };
+const heroElement=document.getElementById('hero')!;
+const chartElement=document.getElementById('chart-panel')!;
+const heroSurface=new InkSurface(document.getElementById('hero-stage')!,renderHero,setupHero);
+const chartSurface=new InkSurface(document.getElementById('chart-stage')!,
+  (context,width,height,time)=>renderChart(context,width,height,time*CONFIG.chartSpeed));
+const hero:Clock={name:'hero',surface:heroSurface,duration:CONFIG.duration,time:0,state:'unstarted',held:false,threshold:.1};
+const chart:Clock={name:'chart',surface:chartSurface,duration:CONFIG.chartDuration,time:0,state:'unstarted',held:false,threshold:.28};
+const clocks=[hero,chart];
+const effects=initSiteEffects();
+const morph=initScrollMorph();
+const table=document.querySelector<HTMLTableElement>('#impact-table table')!;
+const discrepancy=useTableObservations(table);
+if(discrepancy.length) console.warn('Monthly chart/table mismatch with approved reference:',discrepancy);
+let raf=0,last=0,globalPaused=false,tableHeld=false,disposed=false;
+const listeners:Array<()=>void>=[];
+function on(target:EventTarget,type:string,handler:EventListener,options?:AddEventListenerOptions){
+  target.addEventListener(type,handler,options);listeners.push(()=>target.removeEventListener(type,handler,options));
+}
+const button=(id:string)=>document.getElementById(id) as HTMLButtonElement;
+const chartButton=button('graph-pause'), tableButton=button('table-pause');
+
+function visible(clock:Clock) {
+  const rect=(clock.name==='hero'?heroElement:chartElement).getBoundingClientRect();
+  return rect.bottom>innerHeight*clock.threshold && rect.top<innerHeight*(1-clock.threshold);
+}
+function setLabels() {
+  chartButton.textContent=chart.held?'Resume graph':'Pause graph';
+  chartButton.setAttribute('aria-label',chartButton.textContent+' animation');
+  tableButton.textContent=tableHeld?'Resume table':'Pause table';
+  tableButton.setAttribute('aria-label',tableButton.textContent+' animation');
+}
+function paint(clock:Clock) {
+  clock.surface.render(clock.time);
+  (clock.name==='hero'?heroElement:chartElement).classList.add('approved-ink-ready');
+  setLabels();
+}
+function syncClock(clock:Clock,delta:number) {
+  if(clock.state==='completed')return false;
+  if(!effects.motionEnabled()) {
+    clock.time=clock.duration;clock.state='completed';paint(clock);return false;
+  }
+  if(globalPaused||clock.held||document.hidden||!visible(clock)) {
+    if(clock.state==='playing')clock.state='paused';
+    return false;
+  }
+  if(clock.state==='unstarted'||clock.state==='paused') clock.state='playing';
+  if(delta>0) {
+    clock.time=Math.min(clock.duration,clock.time+delta);
+    if(clock.time>=clock.duration)clock.state='completed';
+    paint(clock);
+  }
+  return clock.state==='playing';
+}
+function frame(now:number) {
+  raf=0;if(disposed||document.hidden){last=0;return;}
+  const delta=last?Math.min(.08,Math.max(0,(now-last)/1000)):0;last=now;
+  const active=clocks.map(clock=>syncClock(clock,delta)).some(Boolean);
+  if(active)raf=requestAnimationFrame(frame);else last=0;
+}
+function schedule() {if(!raf&&!document.hidden&&!disposed){last=0;raf=requestAnimationFrame(frame);}}
+function seek(target:'hero'|'chart',seconds:number) {
+  const clock=target==='hero'?hero:chart;
+  clock.time=Math.max(0,Math.min(clock.duration,seconds));
+  clock.state=clock.time===clock.duration?'completed':'paused';
+  clock.held=true;paint(clock);setLabels();
+}
+function replay(target:'hero'|'chart'|'table'='hero') {
+  if(target==='table'){tableHeld=false;effects.ink.replay('impact-table');setLabels();return;}
+  const clock=target==='hero'?hero:chart;
+  clock.time=0;clock.state='unstarted';clock.held=false;paint(clock);schedule();
+}
+function pause(){globalPaused=true;effects.ink.pause();last=0;setLabels();}
+function resume(){globalPaused=false;effects.ink.play();last=0;setLabels();schedule();}
+function inspect() {return {hero:{state:hero.state,time:hero.time,duration:hero.duration,nameInk:nameAmount(hero.time),titleInk:titleAmount(hero.time),
+  nameVisible:nameAmount(hero.time)>.001,nameFullyFormed:nameAmount(hero.time)>.997,titleVisible:titleAmount(hero.time)>.001,
+  remainingDebris:remainingDebris(hero.time),artwork:inspectArtwork(hero.time),renderer:heroSurface.element.dataset.renderer},
+  chart:{state:chart.state,time:chart.time,duration:chart.duration,renderer:chartSurface.element.dataset.renderer},
+  table:effects.ink.diagnostics().blocks.find(block=>block.id==='impact-table'),discrepancy,globalPaused};}
+declare global {interface Window {PortfolioInk?:{seek:(target:'hero'|'chart',seconds:number)=>void;replay:(target?:'hero'|'chart'|'table')=>void;pause:()=>void;resume:()=>void;inspect:typeof inspect}}}
+window.PortfolioInk={seek,replay,pause,resume,inspect};
+on(chartButton,'click',()=>{if(chart.state==='completed')return;chart.held=!chart.held;if(chart.held&&chart.state==='playing')chart.state='paused';setLabels();schedule();});
+on(button('replay-chart'),'click',()=>replay('chart'));
+on(tableButton,'click',()=>{tableHeld=!tableHeld;if(tableHeld)effects.ink.pause('impact-table');else effects.ink.play('impact-table');setLabels();});
+on(button('replay-table'),'click',()=>replay('table'));
+const resizeObserver=new ResizeObserver(()=>{for(const clock of clocks)if(clock.surface.resize())paint(clock);morph.refresh();schedule();});
+resizeObserver.observe(heroSurface.element);resizeObserver.observe(chartSurface.element);
+on(window,'scroll',schedule,{passive:true});
+on(document,'visibilitychange',()=>{last=0;if(!document.hidden)schedule();});
+on(window,'perch:motion',()=>{last=0;for(const clock of clocks){if(!effects.motionEnabled()){clock.time=clock.duration;clock.state='completed';paint(clock);}}schedule();});
+on(window,'beforeprint',()=>{for(const clock of clocks){clock.time=clock.duration;clock.state='completed';paint(clock);}});
+for(const clock of clocks)paint(clock);
+schedule();
+export function dispose(){disposed=true;cancelAnimationFrame(raf);resizeObserver.disconnect();listeners.forEach(remove=>remove());morph.dispose();effects.dispose();clocks.forEach(clock=>clock.surface.dispose());delete window.PortfolioInk;}

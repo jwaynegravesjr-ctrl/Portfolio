@@ -1,0 +1,33 @@
+/* The approved banner and graph are scoped here; the rest of the portfolio keeps its existing design. */
+#hero:not([style]){
+  height:25svh;min-height:190px;max-height:320px;width:100%;overflow:hidden;
+  position:relative;isolation:isolate;background:var(--paper);border-bottom:1px solid #c7c6b8;
+}
+#hero-stage{position:absolute;inset:0;overflow:hidden}
+#hero-stage canvas,#chart-stage canvas{display:block;position:absolute;inset:0;width:100%;height:100%}
+#hero-stage .hero-static,#hero-stage .hero-static img{display:block;width:100%;height:100%}
+#hero-stage .hero-static img{object-fit:cover;object-position:center}
+#hero.approved-ink-ready .hero-static,.approved-chart.approved-ink-ready .chart-static{display:none!important}
+.chart-controls button:hover,.table-controls button:hover{border-bottom-color:currentColor}
+.chart-controls button:focus-visible,.table-controls button:focus-visible{outline:2px solid #272a25;outline-offset:4px}
+.result-grid-single{display:block;margin-bottom:42px}
+.chart-wrap.approved-chart{position:relative;width:min(100%,680px);margin:42px auto 28px;padding-bottom:8px;border-top:1px solid #c7c6b8}
+#chart-stage{position:relative;height:295px;overflow:hidden;background:#f2eee3}
+#chart-stage .chart-static{display:block;width:100%;height:100%;object-fit:contain}
+.approved-chart .chart-desc{display:flex;justify-content:space-between;align-items:center;gap:16px;max-width:none;margin:5px 0 0;font:10px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.025em;text-transform:uppercase;color:#70756a}
+.chart-controls,.table-controls{display:flex;justify-content:flex-end;align-items:center;gap:16px}
+.chart-controls button,.table-controls button{font:10px/1.5 Arial,Helvetica,sans-serif;letter-spacing:.02em;color:#70756a;background:none;border:0;border-bottom:1px solid transparent;padding:5px 1px;white-space:nowrap}
+.table-controls{margin:12px 0 0}
+#impact-table{margin-top:8px}
+@media(max-width:800px){
+  .chart-wrap.approved-chart{width:100%;margin:32px auto 28px}
+  #chart-stage{height:280px}
+}
+@media(max-width:580px){
+  #hero:not([style]){min-height:205px}
+  #chart-stage{height:270px}
+  .approved-chart .chart-desc{font-size:9px}
+  .chart-controls,.table-controls{gap:9px}
+  .chart-controls button,.table-controls button{font-size:9px}
+}
+@media print{#hero,.chart-controls,.table-controls{display:none!important}.approved-chart .chart-static{display:block!important}.approved-chart canvas{display:none!important}}

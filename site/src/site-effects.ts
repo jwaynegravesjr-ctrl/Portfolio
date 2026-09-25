@@ -1,7 +1,8 @@
 import { initSiteInk } from './site-ink';
+import type { InkFormationApi } from './ink-formation';
 
 /** Accessible ink formation, margin leaves, motion preference, and report dialog. */
-export function initSiteEffects(): { dispose(): void } {
+export function initSiteEffects(): { dispose(): void; ink: InkFormationApi; motionEnabled(): boolean } {
   const root = document.documentElement;
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
   const motionButton = document.querySelector<HTMLButtonElement>('#motion-toggle');
@@ -136,7 +137,7 @@ export function initSiteEffects(): { dispose(): void } {
     syncMotion();
   });
   resize(); syncMotion();
-  return { dispose() {
+  return { ink, motionEnabled: () => enabled, dispose() {
     disposed = true; if (leafFrame) cancelAnimationFrame(leafFrame); leafFrame = 0;
     disposers.forEach(remove => remove()); ink.dispose(); leafContext?.clearRect(0, 0, viewportWidth, viewportHeight);
   } };

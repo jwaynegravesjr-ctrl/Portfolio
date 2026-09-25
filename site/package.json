@@ -9,7 +9,7 @@
     "build:pages": "tsc --noEmit && vite build --mode pages",
     "preview": "vite preview --host 127.0.0.1",
     "validate": "tsc --noEmit && node scripts/validate.mjs",
-    "check:browser": "node scripts/check-site-ink.cjs",
+    "check:browser": "node scripts/check-approved.cjs",
     "capture": "node scripts/capture.cjs"
   },
   "dependencies": { "three": "0.180.0" },

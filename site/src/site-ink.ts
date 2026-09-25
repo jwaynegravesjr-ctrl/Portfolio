@@ -56,23 +56,17 @@ function makeBlocks(): InkBlockSpec[] {
       id, element, selector, duration: isTable ? TABLE_DURATION : TEXT_DURATION,
       triggerLineViewportHeights: isTable ? TABLE_TRIGGER_LINE : TEXT_TRIGGER_LINE,
       finishLineViewportHeights: isTable ? undefined : TEXT_FINISH_LINE,
+      visibleOnly: isTable,
       layers: () => isTable ? tablePlans(element) : [{ sources: [element], start: 0, duration: TEXT_DURATION, poolDiameter }],
-      completeOnScroll: isTable ? element : undefined,
     };
   });
 }
 
-export function initSiteInk(enabled: boolean): { dispose(): void; setMotionEnabled(value: boolean): void } {
+export function initSiteInk(enabled: boolean): InkFormationApi {
   const api = createInkFormation({ blocks: makeBlocks(), paperColor: '#efe7d7', maxPixelRatio: 1.5, enabled });
   if (new URLSearchParams(location.search).has('inspect')) {
     const { replay, pause, play, seek, diagnostics, dispose } = api;
     window.siteInk = { replay, pause, play, seek, diagnostics, dispose };
   }
-  return {
-    dispose() {
-      api.dispose();
-      if (window.siteInk?.dispose === api.dispose && new URLSearchParams(location.search).has('inspect')) delete window.siteInk;
-    },
-    setMotionEnabled: api.setMotionEnabled,
-  };
+  return api;
 }
