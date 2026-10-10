@@ -77,7 +77,7 @@ WIPRO_BULLETS = [
     "Authored the operational questions, answers, corrective callouts, email "
     "templates and decision logic in pseudocode. AI converted that pseudocode "
     "into the local HTML/CSS Genetics Support Tool.",
-    "Rolled out the tool to all teams at the beginning of July, demonstrated it "
+    "Rolled out the tool to all teams in May, demonstrated it "
     "to genetics teams and provided team leads with written guidance. Team leads "
     "confirmed continued use; leaders described using it to coach agents.",
 ]

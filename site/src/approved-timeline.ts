@@ -7,6 +7,7 @@ export const CONFIG = Object.freeze({
   /** Another 10% faster than the previous 115% graph rate. */
   chartSpeed: 1.15 * 1.10,
   chartDuration: 7.2 / (1.15 * 1.10),
+  rolloutMonth: 'May',
   paper: '#f2eee3', heroPaper: '#efe7d7', ink: '#272a25', muted: '#70756a', sage: '#74856d',
   seed: 303, maxDpr: 1.6,
 });

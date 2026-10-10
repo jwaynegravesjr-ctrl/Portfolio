@@ -38,7 +38,10 @@ try {
     'The earlier months stay in view:','Five complete months of full-operation reporting.',
     'Explore the Genetics Support Tool case','My responsibility','My operational content and pseudocode guided'])
     assert.ok(!html.includes(removed),`Removed copy remains: ${removed}`);
-  assert.ok(html.includes('Using my operational content and pseudocode, I used AI coding tools to produce an effective software based solution.'));
+  assert.ok(html.includes("Copilot generated the local browser-based tool's code from my content and decision logic."));
+  assert.equal(CONFIG.rolloutMonth,'May');
+  assert.ok(html.includes('I rolled out the tool in May'));
+  assert.ok(html.includes('Tool rollout: May.'));
   assert.equal((html.match(/<tr><th scope="row">/g)||[]).length,5);
   assert.ok(!html.includes('id="replay-hero"')&&!html.includes('id="play"'),'Banner controls were removed at source.');
   assert.ok(!html.includes('data-ink-id="portrait-caption"'),'Portrait caption remains in the homepage');

@@ -39,6 +39,8 @@ From `site/`, run `npm run validate` for the retimed score, observations, and re
 
 | Date | Change |
 | --- | --- |
+| 2026-10-10 | Prepared the approved May rollout correction for publication: matching animated/static chart markers and case-study text, unchanged monthly observations and resume PDF. |
+| 2026-10-09 | Local correction from J: rollout was in May. Updated animated/static chart markers, accessible chart description, case-study copy, study copy and historical generator wording. Monthly observations and current resume PDF unchanged; not yet published. |
 | 2026-09-25 | Integrated the approved utility-line banner, faster independent graph, persistent table playback, requested copy edits, permanent hero title, portrait-caption removal, and matching paper color into the GitHub Pages build. |
 | 2026-09-24 | Matched the hero canvas, CSS background, and desktop/mobile fallback images to the website's `#efe7d7` paper; the separate graph treatment remains unchanged. Local checks pass; no deployment. |
 | 2026-09-24 | Enlarged and retained the hero's professional title, lengthened the birds' staggered ink birth, removed the portrait caption, sped the graph by a further 10%, and refreshed static fallbacks. Local checks pass; no deployment. |

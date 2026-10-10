@@ -185,7 +185,8 @@ function renderChart(g,w,h,t){const points=graphPoints(w,h),base=points[0].base,
  points.forEach((pt,i)=>{const a=i===4?phase(t,6.75,7.15):phase(p,i-.045,i+.13);if(a<=0)return;g.save();g.globalAlpha=a;g.fillStyle='#a4af96';blob(g,pt.x,pt.y,6.7*a,i+30);g.fillStyle=CONFIG.ink;blob(g,pt.x,pt.y,3.1*a,i+5);g.fillStyle=CONFIG.paper;ellipse(g,pt.x-.4,pt.y-.55,.65,.65);
   g.fillStyle=CONFIG.ink;g.font='18px Georgia';g.textAlign=i===0?'left':(i===4?'right':'center');g.fillText(pt.rate.toFixed(2),pt.x+(i===0?0:0),pt.y-14);g.restore()});
  if(p<4){g.fillStyle=CONFIG.ink;blob(g,end.x,end.y,2.7,44);g.save();g.globalAlpha=.16;for(let j=0;j<4;j++)blob(g,end.x+rand(j+1)*7,end.y+rand(j+3)*5,rand(j+22)*1.5,30+j);g.restore()}
- if(p>2.96){const a=phase(p,2.96,3.25),pt=points[3];g.save();g.globalAlpha=a*.5;g.strokeStyle='#819071';g.setLineDash([2,4]);line(g,[[pt.x,30],[pt.x,pt.y-30]],.7);g.setLineDash([]);g.font='8px Courier New';g.fillStyle='#546649';g.textAlign='center';g.fillText('JULY ROLLOUT',pt.x,27);g.restore()}
+ const rolloutIndex=MONTHS.findIndex(month=>month.name===CONFIG.rolloutMonth);
+ if(rolloutIndex>=0&&p>rolloutIndex-.04){const a=phase(p,rolloutIndex-.04,rolloutIndex+.25),pt=points[rolloutIndex];g.save();g.globalAlpha=a*.5;g.strokeStyle='#819071';g.setLineDash([2,4]);line(g,[[pt.x,30],[pt.x,pt.y-30]],.7);g.setLineDash([]);g.font='8px Courier New';g.fillStyle='#546649';g.textAlign='center';g.fillText(`${CONFIG.rolloutMonth.toUpperCase()} ROLLOUT`,pt.x,27);g.restore()}
 }
 
 export function setupHero(w:number,h:number,dpr:number){

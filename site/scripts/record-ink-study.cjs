@@ -12,7 +12,7 @@ const {chromium} = require(path.join(os.homedir(), '.cache/codex-runtimes/codex-
 const targetURL = new URL(process.env.INK_STUDY_URL || 'http://127.0.0.1:8903/ink-study.html?inspect');
 targetURL.searchParams.set('inspect', '');
 const url = targetURL.href;
-const FULL_OPERATION = 'These figures cover the full operation. The downward trend began before the July rollout, so this comparison does not isolate the tool’s effect or measure a genetics-only improvement.';
+const FULL_OPERATION = 'These figures cover the full operation. The tool rolled out in May; this comparison does not isolate the tool’s effect or measure a genetics-only improvement.';
 const specs = [
   {id: 'heading', locator: page => page.getByRole('heading', {level: 1, name: 'What the numbers show.'}), duration: 1.6},
   {id: 'paragraph', locator: page => page.getByText(FULL_OPERATION, {exact: true}), duration: 1.6},

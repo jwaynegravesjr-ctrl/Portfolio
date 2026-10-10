@@ -85,7 +85,7 @@ const readNavigationBirdBands = target => target.locator('#top-birds').evaluate(
 
     await test('The approved narrative, attribution and corrected table replace old claims', async () => {
       const text = await page.locator('main').innerText();
-      for (const phrase of ['20-person operations team', '80-person line of business', 'Nurse Supervisor', 'refined and expanded', 'pseudocode', 'AI converted', 'beginning of July', '45.8%', 'full operation', 'downward trend began before', 'does not isolate', 'genetics-only', 'not been independently verified']) assert.ok(text.includes(phrase), phrase);
+      for (const phrase of ['20-person operations team', '80-person line of business', 'Nurse Supervisor', 'refined and expanded', 'pseudocode', 'AI converted', 'tool in May', '45.8%', 'full operation', 'downward trend began before', 'does not isolate', 'genetics-only', 'not been independently verified']) assert.ok(text.includes(phrase), phrase);
       const completeCopy = await page.locator('main').textContent();
       assert.ok(completeCopy.includes('Synthetic Genetics Governance Report'));
       for (const removed of ['What the evidence supports', 'Follow-up accounts support continued use beyond distribution.', 'This employment-based case is my first-person account.', 'These report figures do not represent measured workplace results.']) assert.ok(!completeCopy.includes(removed), `Removed passage remains: ${removed}`);
@@ -97,7 +97,7 @@ const readNavigationBirdBands = target => target.locator('#top-birds').evaluate(
       ]);
       const adjacent = await page.locator('.result-grid').innerText();
       assert.ok(adjacent.includes('2.62') && adjacent.includes('1.42') && adjacent.includes('does not isolate'));
-      assert.ok(!/80\s*%|30\s*%|100\s*%|10\s*[–-]\s*12\s*hours|80 direct reports|May rollout|Agent Orchestration/i.test(text));
+      assert.ok(!/80\s*%|30\s*%|100\s*%|10\s*[–-]\s*12\s*hours|80 direct reports|July rollout|Agent Orchestration/i.test(text));
     });
 
     await test('The opening contains the animation and discreet pause without its old outer chrome', async () => {

@@ -12,7 +12,7 @@ const out = name => path.join(evidence, name.startsWith('ink-study-') ? name : `
 const targetURL = new URL(process.env.INK_STUDY_URL || 'http://127.0.0.1:8903/ink-study.html?inspect');
 targetURL.searchParams.set('inspect', '');
 const url = targetURL.href;
-const FULL_OPERATION = 'These figures cover the full operation. The downward trend began before the July rollout, so this comparison does not isolate the tool’s effect or measure a genetics-only improvement.';
+const FULL_OPERATION = 'These figures cover the full operation. The tool rolled out in May; this comparison does not isolate the tool’s effect or measure a genetics-only improvement.';
 const SOURCE_NOTE = 'Source: my reported totals for complete calendar months. There was no reported change in auditing or error reporting. These figures have not been independently verified.';
 const specs = {
   heading: {duration: 1.6, selector: 'h1'},
